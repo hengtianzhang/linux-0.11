@@ -23,7 +23,7 @@
 00000000000i[     ]   Icache support: yes
 00000000000i[     ]   Host Asm support: yes
 00000000000i[     ]   Fast function calls: yes
-00000000000i[MEM0 ] allocated memory at 02909020. after alignment, vector=0290A000
+00000000000i[MEM0 ] allocated memory at 02DAD020. after alignment, vector=02DAE000
 00000000000i[MEM0 ] 16.00MB
 00000000000i[MEM0 ] rom at 0xf0000/65536 ('C:\Program Files (x86)\Bochs-2.2.1/BIOS-bochs-latest')
 00000000000i[MEM0 ] rom at 0xc0000/32768 ('C:\Program Files (x86)\Bochs-2.2.1/VGABIOS-elpin-2.40')
@@ -34,7 +34,7 @@
 00000000000i[IOAP ] initializing I/O APIC
 00000000000i[IOAP ] set APIC ID to 1
 00000000000i[CMOS ] Using local time for initial clock
-00000000000i[CMOS ] Setting initial clock to: Sat Nov 24 21:30:31 2018 (time0=1543066231)
+00000000000i[CMOS ] Setting initial clock to: Sat Nov 24 21:46:25 2018 (time0=1543067185)
 00000000000i[DMA  ] channel 4 used by cascade
 00000000000i[DMA  ] channel 2 used by Floppy Drive
 00000000000i[FDD  ] fd0: 'a.img' ro=0, h=2,t=80,spt=18
@@ -69,29 +69,34 @@
 00000000000i[     ] reset of 'extfpuirq' plugin device by virtual method
 00000000000i[     ] reset of 'gameport' plugin device by virtual method
 00000000000i[     ] reset of 'speaker' plugin device by virtual method
+00000000000i[     ] set SIGINT handler to bx_debug_ctrlc_handler
+00000000000e[WGUI ] Sim window's client size(0, 0) was different from the stretched size(640, 480) !!
 00000004447i[BIOS ]  rombios.c,v 1.138.2.1 2005/07/06 19:30:36 vruppert Exp $
 00000319258i[KBD  ] reset-disable command received
 00001200000i[WGUI ] dimension update x=720 y=400 fontheight=16 fontwidth=9 bpp=8
 00016018906e[HD   ] device set to 0 which does not exist
 00016019199e[HD   ] device set to 1 which does not exist
-00154576000p[WGUI ] >>PANIC<< Window closed, exiting!
-00154576000i[SYS  ] Last time is 1543066269
-00154576000i[CPU0 ] real mode
-00154576000i[CPU0 ] CS.d_b = 16 bit
-00154576000i[CPU0 ] SS.d_b = 16 bit
-00154576000i[CPU0 ] | EAX=0fff1301  EBX=00000007  ECX=0015001c  EDX=00000e00
-00154576000i[CPU0 ] | ESP=0000ff00  EBP=0000001e  ESI=00000200  EDI=00000200
-00154576000i[CPU0 ] | IOPL=0 NV UP DI PL ZR NA PE NC
-00154576000i[CPU0 ] | SEG selector     base    limit G D
-00154576000i[CPU0 ] | SEG sltr(index|ti|rpl)     base    limit G D
-00154576000i[CPU0 ] |  CS:9020( 0000| 0|  0) 00090200 0000ffff 0 0
-00154576000i[CPU0 ] |  DS:9020( 0000| 0|  0) 00090200 0000ffff 0 0
-00154576000i[CPU0 ] |  SS:9000( 0000| 0|  0) 00090000 0000ffff 0 0
-00154576000i[CPU0 ] |  ES:9020( 0000| 0|  0) 00090200 0000ffff 0 0
-00154576000i[CPU0 ] |  FS:0000( 0000| 0|  0) 00000000 0000ffff 0 0
-00154576000i[CPU0 ] |  GS:0000( 0000| 0|  0) 00000000 0000ffff 0 0
-00154576000i[CPU0 ] | EIP=0000001c (0000001c)
-00154576000i[CPU0 ] | CR0=0x00000010 CR1=0 CR2=0x00000000
-00154576000i[CPU0 ] | CR3=0x00000000 CR4=0x00000000
-00154576000i[     ] restoring default signal behavior
-00154576000i[CTRL ] quit_sim called with exit code 1
+00085717404e[WGUI ] Sim window's client size(640, 480) was different from the stretched size(720, 400) !!
+00146796000p[WGUI ] >>PANIC<< Window closed, exiting!
+00146796000i[SYS  ] Last time is 1543067221
+00146796000i[CPU0 ] real mode
+00146796000i[CPU0 ] CS.d_b = 16 bit
+00146796000i[CPU0 ] SS.d_b = 16 bit
+00146796000i[CPU0 ] | EAX=0fff1301  EBX=00000007  ECX=0015001c  EDX=00000e00
+00146796000i[CPU0 ] | ESP=0000ff00  EBP=0000001e  ESI=00000200  EDI=00000200
+00146796000i[CPU0 ] | IOPL=0 NV UP DI PL ZR NA PE NC
+00146796000i[CPU0 ] | SEG selector     base    limit G D
+00146796000i[CPU0 ] | SEG sltr(index|ti|rpl)     base    limit G D
+00146796000i[CPU0 ] |  CS:9020( 0000| 0|  0) 00090200 0000ffff 0 0
+00146796000i[CPU0 ] |  DS:9020( 0000| 0|  0) 00090200 0000ffff 0 0
+00146796000i[CPU0 ] |  SS:9000( 0000| 0|  0) 00090000 0000ffff 0 0
+00146796000i[CPU0 ] |  ES:9020( 0000| 0|  0) 00090200 0000ffff 0 0
+00146796000i[CPU0 ] |  FS:0000( 0000| 0|  0) 00000000 0000ffff 0 0
+00146796000i[CPU0 ] |  GS:0000( 0000| 0|  0) 00000000 0000ffff 0 0
+00146796000i[CPU0 ] | EIP=0000001c (0000001c)
+00146796000i[CPU0 ] | CR0=0x00000010 CR1=0 CR2=0x00000000
+00146796000i[CPU0 ] | CR3=0x00000000 CR4=0x00000000
+00146796000i[CPU0 ] >> eb
+00146796000i[CPU0 ] >> fe
+00146796000i[CPU0 ] >> : jmp .+0x1c
+00146796000i[CTRL ] quit_sim called with exit code 1
