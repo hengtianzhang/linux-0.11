@@ -1,6 +1,6 @@
 .text
-.global _start, main
+.global main, _start
 _start:
+startup_32:
 	movl $0x10, %eax
-	mov %ax, %ds
 	jmp main
