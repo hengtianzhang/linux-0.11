@@ -1,8 +1,11 @@
 .code16
 .section .text
+STSSIZE  = 0x3000
 BOOTSEG  = 0x07c0
 INITSEG  = 0x9000
 SETUPSEG = 0x9020
+SYSSEG   = 0x1000
+ENDSEG   = SYSSEG + SYSSEG
 SETUPLEN = 1
 .global _start
 _start:
@@ -32,7 +35,6 @@ go:
 	movw %ax, %es
 	movw %ax, %ss
 	movw $0xFF00, %sp
-	
 load_setup:
 	movw $0x0000, %dx        #磁头dh   dl驱动器
 	movw $0x0002, %cx        #ch柱面第六位 cl高两位柱面 低六位扇区起始
@@ -44,9 +46,32 @@ load_setup:
 	movw $0x0000, %ax
 	int $0x13
 	jmp load_setup
-	
 ok_load_setup:
-	jmp $SETUPSEG, $0
+	#jmp $SETUPSEG, $0
+	movb $0x0, %dl
+	movw $0x0800, %ax
+	int $0x13
+	movb $0x0, %ch
+	movw %cx, sectors
+	movw $SYSSEG, %ax
+	movw %ax, %es
+	movw %cs ,%ax
+	movw %ax, %ds
+
+	call read_it
+	movw $0, %ax
+
+sread: .word 5
+head:  .word 0
+track: .word 0
+read_it:
+	movw %es, %ax
+	test $0x0fff, %ax
+die: jne die
+	xor %bx, %bx
+	ret
+sectors:
+	.word 0
 msg:
 	.ascii "Loading sysytem...\n"
 	len = . - msg
