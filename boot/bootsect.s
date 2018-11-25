@@ -59,7 +59,9 @@ ok_load_setup:
 	movw %ax, %ds
 
 	call read_it
+	call kill_motor
 	
+	jmp $SETUPSEG, $0
 
 sread: .word 5
 head:  .word 0
@@ -88,11 +90,70 @@ ok1_read:
 	subw %bx, %ax
 	shr $9, %ax  #ax保存当前磁道，超过64KB段界限，当前段内能读的扇区数
 ok2_read:
-	hlt
+	call read_track
+	movw %ax, %cx
+	addw sread, %ax
+	cmpw sectors, %ax
+	jne ok3_read
+	movw $1, %ax
+	subw head, %ax
+	jne ok4_read
+	incw track
+ok4_read:
+	movw %ax, head
+	xor %ax, %ax
+ok3_read:
+	movw %ax, sread
+	shl $9, %cx
+	addw %cx, %bx
+	jnc rp_read
+	movw %es, %ax
+	addw $0x1000, %ax
+	movw %ax, %es
+	xor %bx, %bx
+	jmp rp_read
+read_track:
+	pushw %ax
+	pushw %bx
+	pushw %cx
+	pushw %dx
+	movw track, %dx
+	movw sread, %cx
+	incw %cx
+	movb %dl, %ch
+	movw head, %dx
+	movb %dl, %dh
+	movb $0, %dl
+	and $0x0100, %dx
+	movb $2, %ah
+	int $0x13
+	jc bad_rt
+	
+	popw %dx
+	popw %cx
+	popw %bx
+	popw %ax
+	ret
+bad_rt:
+	movw $0, %ax
+	movw $0, %dx
+	int $0x13
+	popw %dx
+	popw %cx
+	popw %bx
+	popw %ax
+	jmp read_track
+kill_motor:
+	pushw %dx
+	movw $0x3f2, %dx
+	movb $0, %al
+	outb %al, %dx
+	popw %dx
+	ret
 sectors:
 	.word 0
 msg:
-	.ascii "Loading sysytem...\n"
+	.ascii "Loading setup and sysytem...\n"
 	len = . - msg
 .org 510
 end_glag:

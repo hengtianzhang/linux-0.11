@@ -19,7 +19,7 @@ _start:
 1:
 	jmp 1b
 msg:
-	.ascii "Reloading setup module... :)"
+	.ascii "Enter the setup module... :)\n"
 	len = . - msg
 .org 510
 end_glag:

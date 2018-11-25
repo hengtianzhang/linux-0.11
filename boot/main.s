@@ -19227,6 +19227,8 @@ _start:
 	movw $0x1301, %ax
 	int $0x10
 
+1:
+	jmp 1b
 msg:
-	.ascii "Reloading setup module... :)"
+	.ascii "Rloading system module... :)\n"
 	len = . - msg
