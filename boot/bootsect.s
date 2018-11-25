@@ -1,11 +1,11 @@
 .code16
 .section .text
-STSSIZE  = 0x3000
+SYSSIZE  = 0x3000
 BOOTSEG  = 0x07c0
 INITSEG  = 0x9000
 SETUPSEG = 0x9020
 SYSSEG   = 0x1000
-ENDSEG   = SYSSEG + SYSSEG
+ENDSEG   = SYSSEG + SYSSIZE
 SETUPLEN = 1
 .global _start
 _start:
@@ -59,7 +59,7 @@ ok_load_setup:
 	movw %ax, %ds
 
 	call read_it
-	movw $0, %ax
+	
 
 sread: .word 5
 head:  .word 0
@@ -69,7 +69,26 @@ read_it:
 	test $0x0fff, %ax
 die: jne die
 	xor %bx, %bx
+	
+rp_read:
+	movw %es, %ax
+	cmpw $ENDSEG, %ax
+	jb ok1_read
 	ret
+ok1_read:
+	movw sectors, %ax
+	subw sread, %ax #ax保存当前磁道剩余需要读的扇区
+	movw %ax, %cx  #cx当前磁道未读扇区
+	shl $9, %cx
+	addw %bx, %cx #段内共需读的字节数
+	
+	jnc ok2_read
+	je ok2_read
+	xor %ax, %ax
+	subw %bx, %ax
+	shr $9, %ax  #ax保存当前磁道，超过64KB段界限，当前段内能读的扇区数
+ok2_read:
+	hlt
 sectors:
 	.word 0
 msg:
