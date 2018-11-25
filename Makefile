@@ -2,7 +2,7 @@ all:Image
 
 Image:bootsect setup
 	dd if=boot/bootsect of=tools/a.img bs=512 count=1 seek=0 conv=notrunc
-	dd if=boot/setup of=tools/a.img bs=512 count=1 seek=1 conv=notrunc
+	dd if=boot/setup of=tools/a.img bs=512 count=4 seek=1 conv=notrunc
 
 bootsect:boot/bootsect.s
 	as -o boot/bootsect.o boot/bootsect.s
