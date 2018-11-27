@@ -15,7 +15,7 @@ setup:boot/setup.s
 	ld -Ttext 0x0 --oformat binary -o boot/setup boot/setup.o
 system:boot/head.o
 	$(CC)  -c -o init/main.o init/main.c
-	$(LD)  boot/head.o init/main.o --oformat binary -o system
+	$(LD) -Ttext 0x0 boot/head.o init/main.o --oformat binary -o system
 	objdump -D -b binary -m i386 system > system.list
 head.o:boot/head.s
 	as -o boot/head.o boot/head.s
