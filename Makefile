@@ -1,7 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -O -S -fstrength-reduce -fomit-frame-pointer
 LD = ld
-LDFLAGS = -s -x 
 all:Image
 
 Image:bootsect setup system
@@ -16,9 +14,8 @@ setup:boot/setup.s
 	as -o boot/setup.o boot/setup.s
 	ld -Ttext 0x0 --oformat binary -o boot/setup boot/setup.o
 system:boot/head.o
-	$(CC) $(CFLAGS) -nostdinc -o init/main.s init/main.c
-	as -o init/main.o init/main.s
-	$(LD) $(LDFLAGS)   boot/head.o init/main.o --oformat binary -o system
+	$(CC)  -c -o init/main.o init/main.c
+	$(LD)  boot/head.o init/main.o --oformat binary -o system
 	objdump -D -b binary -m i386 system > system.list
 head.o:boot/head.s
 	as -o boot/head.o boot/head.s
