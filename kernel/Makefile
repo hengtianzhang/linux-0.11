@@ -1,13 +1,13 @@
-AR = ar
 CC = gcc
+AR = ar
 LD = ld
-CFLAGE = -I../include -I../include/linux
+CFLAGE = -I../include -I../include/linux -I../include/asm
 src = $(shell find ./ -name "*.c")
 obj = $(src:%.c=%.o)
-prom = kernel.a
+prom = kernel.o
 
 $(prom):$(obj)
-	$(AR) rcs $@ printk.o sched.o
+	$(LD) -r -o $@  *.o
 
 %.o:%.c	
 	$(CC) $(CFLAGE) -c -o $@ $<
