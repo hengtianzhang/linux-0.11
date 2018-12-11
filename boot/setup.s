@@ -50,9 +50,54 @@ _start:
 	movw %cx, 12 #0x9000C=显示卡特性参数
 	
 	
-	#硬盘参数？？？？？
-	#？？？unfinish????
-	
+	#get硬盘参数 hd0
+	#中断向量0x41的向量值第一个硬盘表首地址
+	#0x46第二个硬盘表首地址
+	#表长16字节0x10 0x90080存放第一个硬盘表
+	#0x90090存放第二个
+
+	#GET hd0
+	movw $0x0000, %ax
+	movw %ax, %ds
+	ldsw 4*0x41, %si
+	movw $INITSEG, %ax
+	movw %ax, %es
+	movw $0x0080, %di
+	movw $0x10, %cx
+	rep
+	movsb
+
+
+	#GET hd1
+	movw $0x0000, %ax
+	movw %ax, %ds
+	ldsw 4*0x46, %si
+	movw $INITSEG, %ax
+	movw %ax, %es
+	movw $0x0090, %di
+	movw $0x10, %cx
+	rep
+	movsb
+
+	#check that there IS a hd1
+	#利用BIOS中断0x13取盘类型功能，功能号ah=0x15
+	#输入dl=驱动号(0x8x是硬盘，0x80指第一个硬盘，0x81指第二个)
+	#输出 ah=类型码 00没有这个硬盘 CF置位      
+	#01是软驱 02是软驱或其他可移动设备 03是硬盘
+	movw $0x1500, %ax
+	movb $0x81, %dl
+	int $0x13
+	jc no_disk1
+	je is_disk1
+no_disk1:
+	movw $INITSEG, %ax
+	movw %ax, %es
+	movw $0x0090, %di
+	movw $0x10, %cx
+	movw $0x00, %ax
+	rep
+	stosb
+is_disk1:
 	#now move to protected mode ...
 	cli
 	movw $0x0000, %ax
