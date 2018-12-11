@@ -1,12 +1,13 @@
 .code16
 .section .text
+SETUPLEN = 4
 SYSSIZE  = 0x3000
 BOOTSEG  = 0x07c0
 INITSEG  = 0x9000
 SETUPSEG = 0x9020
 SYSSEG   = 0x1000
 ENDSEG   = SYSSEG + SYSSIZE
-SETUPLEN = 4
+ROOT_DEV = 0x306 
 .global _start
 _start:
 	movw $BOOTSEG, %ax    #bootsect加载地址 0x7c00
@@ -155,6 +156,8 @@ sectors:
 msg:
 	.ascii "Loading setup and sysytem...\n"
 	len = . - msg
-.org 510
+.org 508
+root_dev:
+	.word ROOT_DEV
 end_glag:
 	.word 0xAA55
