@@ -1,7 +1,7 @@
 AR = ar
 CC = gcc
 LD = ld
-CFLAGE = -I../include -I../include/linux -I../include/asm -I./include/sys
+CFLAGE =-fno-stack-protector  -I../include -I../include/linux -I../include/asm -I./include/sys
 src = $(shell find ./ -name "*.c")
 obj = $(src:%.c=%.o)
 prom = mm.o

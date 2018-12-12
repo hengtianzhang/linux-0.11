@@ -339,7 +339,6 @@ void do_no_page(unsigned long error_code, unsigned long address)
 
 	address &= 0xfffff000;
 	tmp = address - current->start_code;
-
 	if (!current->executable || tmp >= current->end_data) {
 		get_empty_page(address);
 		return;
@@ -366,8 +365,6 @@ void do_no_page(unsigned long error_code, unsigned long address)
 	oom();
 	
 }
-
-
 
 
 void mem_init(long start_mem, long end_mem)

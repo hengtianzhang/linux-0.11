@@ -7,11 +7,11 @@
 #define __LIBRARY__
 #include <linux/head.h>
 #include <asm/io.h>
-
+#include <linux/fs.h>
 static char printbuf[1024];             /*静态字符串数组,用作内核显示信息的缓存*/
 
 extern void mem_init(long mem_start, long end);  /*内存管理初始化*/
-
+extern  void check_data32(int value, int pos);
 #define EXT_MEM_K (*(unsigned short *)0x90002)   /*1MB以后的拓展内存(KB)*/
 
 

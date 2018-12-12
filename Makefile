@@ -1,6 +1,6 @@
 CC = gcc
 LD = ld
-CFLAGE = -I./include -I./include/linux -I./include/asm -I./include/sys
+CFLAGE =-fno-stack-protector -I./include -I./include/linux -I./include/asm -I./include/sys
 all:Image
 KERNEL = kernel/kernel.o
 MM = mm/mm.o
@@ -24,7 +24,7 @@ system:boot/head.o
 	cd fs;make
 	$(CC) $(CFLAGE) -c -o init/main.o init/main.c
 	$(LD) -Ttext 0x0 boot/head.o init/main.o $(MM)  $(KERNEL) \
-    $(LIB) $(FS) --oformat binary -o system
+	$(LIB) $(FS) --oformat binary -o system
 	objdump -D -b binary -m i386 system > system.list
 
 main.o:init/main.o
