@@ -4,10 +4,10 @@ LD = ld
 CFLAGE = -I../include -I../include/linux -I../include/asm -I./include/sys
 src = $(shell find ./ -name "*.c")
 obj = $(src:%.c=%.o)
-prom = lib.a
+prom = fs.o
 
 $(prom):$(obj)
-	$(AR) rcs -o $@  *.o
+	$(LD) -r -o $@  *.o
 
 %.o:%.c	
 	$(CC) $(CFLAGE) -c -o $@ $<
