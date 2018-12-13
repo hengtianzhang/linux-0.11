@@ -7,6 +7,8 @@ obj = $(src:%.c=%.o)
 prom = kernel.o
 
 $(prom):$(obj)
+	as -o asm.o asm.s
+	as -o system_call.o system_call.s
 	$(LD) -r -o $@  *.o
 
 %.o:%.c	

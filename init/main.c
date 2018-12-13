@@ -27,6 +27,7 @@ inline _syscall0(int,sync)
 
 #include <linux/fs.h>
 
+
 static char printbuf[1024];             /*静态字符串数组,用作内核显示信息的缓存*/
 
 extern int vsprintf(); //送格式化输出到一字符串中
@@ -115,7 +116,8 @@ int main(void)
 #endif
    /*下面开始内核的所有初始化*/
    	mem_init(main_memory_start,memory_end); //主内存初始化
-
+	trap_init();
+	
 }
 
 

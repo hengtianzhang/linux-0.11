@@ -370,7 +370,7 @@ void do_no_page(unsigned long error_code, unsigned long address)
 void mem_init(long start_mem, long end_mem)
 {
 	int i;
-
+	
 	HIGH_MEMORY = end_mem;
 	for (i = 0; i < PAGING_PAGES; i++) {
 		mem_map[i] = USED;

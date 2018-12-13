@@ -10,3 +10,5 @@ struct task_struct * task[NR_TASKS];
 long volatile jiffies = 0;
 long startup_time = 0;
 struct task_struct *current;
+struct task_struct *last_task_used_math = NULL;
+
