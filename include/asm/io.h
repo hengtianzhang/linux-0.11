@@ -16,7 +16,7 @@ _v; \
 })
 
 /* 带延时的硬件端口输出函数。*/
-#define oub_p(value,port) \
+#define outb_p(value,port) \
 __asm__ ("outb %%al,%%dx\n" \
 			"\tjmp 1f\n" \
 			"1:\tjmp 1f\n" \

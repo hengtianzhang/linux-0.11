@@ -7,5 +7,6 @@ struct {
 } stack_start = { & user_stack [ PAGE_SIZE>>2] , 0x10 };
 
 struct task_struct * task[NR_TASKS];
-
+long volatile jiffies = 0;
+long startup_time = 0;
 struct task_struct *current;
