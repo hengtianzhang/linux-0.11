@@ -153,4 +153,176 @@ coprocessor_error:
 	pushl $ret_from_sys_call
 	jmp math_error
 
+/*设备不存在或协处理器不存在*/
+/* 如果控制寄存器CR0中EM(模拟)位置位，则当CPU执行一个协处理器
+ * 指令则会引发该中断。
+ * CR0交换标志TS在CPU执行任务转换时设置。TS可以用来确认是么时候
+ * 协处理器中的内容与CPU执行的任务不匹配。
+ */
+.align 4
+device_not_available:
+	push %ds
+	push %es
+	push %fs
+	push %edx
+	push %ecx
+	push %ebx
+	push %eax
+	movl $0x10, %eax
+	mov %ax, %ds
+	mov %ax, %es
+	movl $0x17, %eax
+	mov %ax, %fs
+	/*清CR0中任务以交换标志TS。取CR0值。若协处理器仿真标志EM没有
+  	 * 置位。则不是EM引发中断，则恢复任务协处理器状态
+	 */
+	pushl $ret_from_sys_call
+	clts #clear TS so that we can use math
+	movl %cr0, %eax
+	testl $0x4, %eax
+	je math_state_restore
+/*若EM标志置位，则取执行数学仿真程序*/
+	pushl %ebp
+	pushl %esi
+	pushl %edi
+	call math_emulate
+	popl %edi
+	popl %esi
+	popl %ebp
+	ret
+
+/*int32 int 0x20 时钟中断处理。中断频率被设置100HZ*/
+/*定时芯片8253/8254在sched.c中初始化。jiffies每10ms加1*/
+/*jiffies增1 发送结束中断指令给8259控制器，用当前特权级
+ *作为参数调用do_timer
+ */
+.align 4
+timer_interrupt:
+	push %ds
+	push %es
+	push %fs
+	pushl %edx
+	pushl %ecx
+	pushl %ebx
+	pushl %eax
+	movl $0x10, %eax
+	mov %ax, %ds
+	mov %ax, %es
+	movl $0x17, %eax
+	mov %ax, %fs
+	incl jiffies
+
+	movb $0x20, %al #EOI to interrupt controller
+	outb %al, $0x20
+
+	/*从堆栈中取出执行系统调用代码的选择符CS中的当前特权级
+	 *并压入 作为do_timer参数。
+	 */
+	movl CS(%esp), %eax
+	andl $3, %eax
+	pushl %eax
+	call do_timer
+	andl $4, %esp
+	jmp ret_from_sys_call
+
+	/*sys_execve()系统调用*/
+.align 4
+sys_execve:
+	lea EIP(%esp), %eax
+	pushl %eax
+	call do_execve
+	addl $4, %esp
+	ret
+
+/*用于创建子进程。*/
+.align 4
+sys_fork:
+	call find_empty_process #取进程号pid
+	testl %eax, %eax #返回负数pid 则任务满
+	js 1f
+	push %gs
+	pushl %esi
+	pushl %edi
+	pushl %ebp
+	pushl %eax
+	call copy_process
+	addl $20, %esp #丢弃所有压入内容
+1:	
+	ret
+
+/*int46 int 0x2E硬盘中断 响应中断请求IRQ14*/
+/*当请求硬盘操作完成或出错会发出此中断*/
+/*首先向8259A发送结束EOI，然后取变量do_hd中的函数指针
+ *置do_hd 为NULL 接着判断edx函数指针是否为空，为空则指向
+ * unexpect_hd_interrupt,用于显示出错信息。随后向8259A主芯片发送
+ * EOI 并调用edx中指针指向的函数
+ */
+hd_interrupt:
+	pushl %eax
+	pushl %ecx
+	pushl %edx
+	push %ds
+	push %es
+	push %fs
+	movl $0x10,%eax
+	mov %ax,%ds
+	mov %ax,%es
+	movl $0x17,%eax
+	mov %ax,%fs
+	movb $0x20,%al
+	outb %al,$0xA0		# EOI to interrupt controller #1
+	jmp 1f			# give port chance to breathe
+1:	jmp 1f
+1:	xorl %edx,%edx
+	xchgl do_hd,%edx
+	testl %edx,%edx
+	jne 1f
+	movl $unexpected_hd_interrupt,%edx
+1:	outb %al,$0x20
+	call *%edx		# "interesting" way of handling intr do_hd.
+	pop %fs
+	pop %es
+	pop %ds
+	popl %edx
+	popl %ecx
+	popl %eax
+	iret
+
+/*int38 int 0x26 軟盤驅動器中斷 響應硬件中斷IRQ6*/
+/*處理同硬盤*/
+floppy_interrupt:
+	pushl %eax
+	pushl %ecx
+	pushl %edx
+	push %ds
+	push %es
+	push %fs
+	movl $0x10,%eax
+	mov %ax,%ds
+	mov %ax,%es
+	movl $0x17,%eax
+	mov %ax,%fs
+	movb $0x20,%al
+	outb %al,$0x20		# EOI to interrupt controller #1
+	xorl %eax,%eax
+	xchgl do_floppy,%eax
+	testl %eax,%eax
+	jne 1f
+	movl $unexpected_floppy_interrupt,%eax
+1:	call *%eax		# "interesting" way of handling intr.
+	pop %fs
+	pop %es
+	pop %ds
+	popl %edx
+	popl %ecx
+	popl %eax
+	iret
+/*int39 int 0x27并行口 IRQ7*/
+/*爲實現*/
+parallel_interrupt:
+	pushl %eax
+	movb $0x20, %al
+	outb %al, $0x20
+	popl %eax
+	iret
 

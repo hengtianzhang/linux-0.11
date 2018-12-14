@@ -192,7 +192,7 @@ void trap_init(void)
 	set_system_gate(4,&overflow);
 	set_system_gate(5,&bounds);
 	set_trap_gate(6,&invalid_op);
-	//set_trap_gate(7,&device_not_available);
+	set_trap_gate(7,&device_not_available);
 	set_trap_gate(8,&double_fault);
 	set_trap_gate(9,&coprocessor_segment_overrun);
 	set_trap_gate(10,&invalid_TSS);
@@ -207,7 +207,7 @@ void trap_init(void)
 	set_trap_gate(45,&irq13);/*设置协处理器中断0x2d 45*/ 
 	outb_p(inb_p(0x21)&0xfb,0x21); /*允许8259A主IRQ2*/
 	outb(inb_p(0xA1)&0xdf,0xA1); /*允许8259A从IRQ13*/
-	//set_trap_gate(39,&parallel_interrupt);/*设置并行口1的中断0x27陷阱门*/
+	set_trap_gate(39,&parallel_interrupt);/*设置并行口1的中断0x27陷阱门*/
 
 }
 

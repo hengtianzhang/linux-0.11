@@ -117,7 +117,7 @@ int main(void)
    /*下面开始内核的所有初始化*/
    	mem_init(main_memory_start,memory_end); //主内存初始化
 	trap_init();
-	
+		
 }
 
 

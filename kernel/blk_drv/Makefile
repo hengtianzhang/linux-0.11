@@ -4,19 +4,13 @@ LD = ld
 CFLAGE =-std=gnu99 -fno-stack-protector  -I../include -I../include/linux -I../include/asm -I./include/sys
 src = $(shell find ./ -name "*.c")
 obj = $(src:%.c=%.o)
-prom = kernel.o
+prom = blk_drv.a
 
 $(prom):$(obj)
-	@cd math;make
-	@cd blk_drv;make
-	as -o asm.o asm.s
-	as -o system_call.o system_call.s
-	$(LD) -r -o $@  *.o
+	$(AR) rcs -o $@  *.o
 
 %.o:%.c	
 	$(CC) $(CFLAGE) -c -o $@ $<
 
 clean:
-	@cd math;make clean
-	@cd blk_drv;make clean
 	rm -f *.o *.a
