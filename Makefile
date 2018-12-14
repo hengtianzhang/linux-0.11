@@ -8,7 +8,7 @@ KERNEL = kernel/kernel.o
 MM = mm/mm.o
 FS = fs/fs.o
 LIB = lib/lib.a
-
+MATH = kernel/math/math.a
 
 Image:bootsect setup system
 	@dd if=boot/bootsect of=tools/a.img bs=512 count=1 seek=0 conv=notrunc
@@ -29,7 +29,7 @@ system:boot/head.o
 	@cd fs;make
 	$(CC) $(CFLAGE) -c -o init/main.o init/main.c
 	$(LD) -Ttext 0x0 boot/head.o init/main.o $(MM)  $(KERNEL) \
-	$(LIB) $(FS) --oformat binary -o system
+	$(LIB) $(FS) $(MATH) --oformat binary -o system
 	objdump -D -b binary -m i386 system > system.list
 
 main.o:init/main.o
