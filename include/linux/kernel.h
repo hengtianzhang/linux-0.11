@@ -27,3 +27,4 @@ void free_s(void * obj, int size);
 
 #define suser() (current->euid == 0)
 
+

@@ -1,5 +1,4 @@
-
-extern inline void  check_data32(int value, int pos)
+void  check_data32(int value, int pos)
 {
 __asm__ __volatile__(
 "shl $4, %%ebx\n\t"
@@ -24,6 +23,7 @@ __asm__ __volatile__(
 "jnz 1b\n"
 ::"m" (value), "b" (pos));
 }
+
 
 
 int printk(const char *fmt, ...)

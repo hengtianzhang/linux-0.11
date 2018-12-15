@@ -4,6 +4,7 @@
  *
  */
 #include <string.h>
+
 #include <linux/head.h> //段描述符的简单结构。和几个选择符常量
 #include <linux/sched.h> //调度程序头文件
 #include <linux/kernel.h> //内核常用函数

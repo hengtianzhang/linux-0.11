@@ -19,3 +19,12 @@ void math_state_restore()
 {}
 void do_timer()
 {}
+void wake_up(struct task_struct **p)
+{
+	
+}
+
+void sleep_on(struct task_struct ** p)
+{
+}
+

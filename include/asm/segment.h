@@ -2,6 +2,7 @@
  * CPU段寄存器操作函数
  */
 /*读取fs段中指定的地址处的字节*/
+
 extern inline unsigned char get_fs_byte(const char * addr)
 {
 	unsigned register char _v;

@@ -116,8 +116,9 @@ int main(void)
 #endif
    /*下面开始内核的所有初始化*/
    	mem_init(main_memory_start,memory_end); //主内存初始化
-	trap_init();
-		
+	trap_init(); //陷阱門(硬件中斷向量)初始化
+ 	blk_dev_init(); //塊設備初始化
+ 	check_data32(1,1);
 }
 
 

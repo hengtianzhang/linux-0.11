@@ -159,7 +159,7 @@ extern struct task_struct *current; //当前进程结构指针变量
 extern long volatile jiffies; //从开机开始算起的滴答数(10ms/滴答)
 extern long startup_time; //开机时间.从1970:0:0:0开始计时秒数
 
-#define CURRNET_TIME (startup_time+jiffies/HZ) /*秒数*/
+#define CURRENT_TIME (startup_time+jiffies/HZ) /*秒数*/
 
 /*添加定时器函数*/
 extern void add_timer(long jiffies, void (*fn)(void));

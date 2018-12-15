@@ -2,7 +2,7 @@ CC = gcc
 LD = ld
 GCCVERSION = $(shell gcc --version | grep ^gcc | sed 's/^.* //g')
 OSVERSION = $(shell getconf LONG_BIT)
-CFLAGE =-std=gnu99 -fno-stack-protector -I./include -I./include/linux -I./include/asm -I./include/sys
+CFLAGE =-std=gnu89 -Wall -O -fstrength-reduce -fomit-frame-pointer  -fno-stack-protector  -nostdinc -I./include -I./include/linux -I./include/asm -I./include/sys
 all:Image
 KERNEL = kernel/kernel.o
 MM = mm/mm.o
@@ -29,8 +29,8 @@ system:boot/head.o
 	@cd mm;make
 	@cd fs;make
 	$(CC) $(CFLAGE) -c -o init/main.o init/main.c
-	$(LD) -Ttext 0x0 boot/head.o init/main.o $(MM)  $(KERNEL) \
-	$(LIB) $(FS) $(MATH) $(DRIVER) --oformat binary -o system
+	$(LD)  -nostdinc -M -Ttext 0x0 boot/head.o init/main.o $(MM)  $(KERNEL) \
+	$(LIB) $(FS) $(MATH) $(DRIVER) --oformat binary -o system > system.map
 	objdump -D -b binary -m i386 system > system.list
 
 main.o:init/main.o
@@ -48,5 +48,5 @@ clean:
 	@(cd lib;make clean)
 	@(cd fs;make clean)
 	rm -f boot/bootsect  boot/setup  boot/*.o init/main.o init/main.s system \
-	system.list
+	system.list system.map
 	@echo "\nrm -rf obj file done!\n"
