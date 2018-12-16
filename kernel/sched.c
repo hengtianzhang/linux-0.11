@@ -29,7 +29,8 @@ void show_stat(void)
 {
 
 }
-
+void sched_init(void)
+{}
 void sleep_on(struct task_struct ** p)
 {
 }

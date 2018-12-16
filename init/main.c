@@ -119,6 +119,9 @@ int main(void)
 	trap_init(); //陷阱門(硬件中斷向量)初始化
  	blk_dev_init(); //塊設備初始化
  	chr_dev_init(); //字符设备初始化
+ 	tty_init();
+ 	time_init(); //設置開機時間
+	sched_init(); //加載任務0
 }
 
 

@@ -29,8 +29,8 @@ system:boot/head.o
 	@cd mm;make
 	@cd fs;make
 	$(CC) $(CFLAGE) -c -o init/main.o init/main.c
-	$(LD)  -nostdinc -M -Ttext 0x0 boot/head.o init/main.o $(MM)  $(KERNEL) \
-	$(LIB) $(FS) $(MATH) $(DRIVER) --oformat binary -o system > system.map
+	$(LD) -nostdinc -M -Ttext 0x0 boot/head.o init/main.o $(MM)  $(KERNEL) \
+	$(FS) $(DRIVER) $(MATH) $(LIB) --oformat binary -o system > system.map
 	objdump -D -b binary -m i386 system > system.list
 
 main.o:init/main.o

@@ -1,3 +1,9 @@
+/*
+ * 内核模式不能使用printf。fs專用於用戶模式
+ * 調用tty_write信息取自fs寄存器 而内核信息只想内核數據段
+ * 故需要使用ds 而臨時使用fs
+ */
+#if 0
 void  check_data32(int value, int pos)
 {
 __asm__ __volatile__(
@@ -24,10 +30,34 @@ __asm__ __volatile__(
 ::"m" (value), "b" (pos));
 }
 
+#endif
+#include <stdarg.h>
+#include <stddef.h>
 
+#include <linux/kernel.h>
+
+static char buf[1024]; //顯示用臨時緩衝區
+
+extern int vsprintf(char *buf, const * fmt, va_list args);
 
 int printk(const char *fmt, ...)
 {
+	va_list args;
 	int i;
+	va_start(args, fmt);
+	i = vsprintf(buf, fmt, args);
+	va_end(args);
+	__asm__("push %%fs\n\t"
+			"push %%ds\n\t"
+			"pop %%fs\n\t"
+			"pushl %0\n\t"
+			"pushl $buf\n\t"
+			"pushl $0\n\t"
+			"call tty_write\n\t"
+			"addl $8, %%esp\n\t"
+			"popl %0\n\t"
+			"pop %%fs"
+			::"r" (i):);
 	return i;
 }
+
