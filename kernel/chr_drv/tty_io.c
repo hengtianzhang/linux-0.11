@@ -17,9 +17,19 @@
    4: 控制台 /dev/ttyn,/dev/console
    5: 其他
  */
+	struct tty_queue * table_list[]={
+		};
 
-
-void chr_dev_init(void)
+extern void keyboard_interrupt();
+void do_tty_interrupt(int tty)
 {
 
 }
+void copy_to_cooked(struct tty_struct * tty)
+{}
+
+void chr_dev_init(void)
+{
+	
+}
+

@@ -25,6 +25,10 @@ void wake_up(struct task_struct **p)
 {
 	
 }
+void show_stat(void)
+{
+
+}
 
 void sleep_on(struct task_struct ** p)
 {

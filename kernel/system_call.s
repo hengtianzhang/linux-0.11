@@ -82,7 +82,7 @@ system_call:
 	movl $0x17, %edx
 	mov %dx, %fs
 	/*call sys_call_table + %eax*4*/
-	call sys_call_table(,%eax,4)
+	call *sys_call_table(,%eax,4)
 	pushl %eax #系统调用返回值入栈
 	/* 查看当前任务的运行状态。如果不在就绪stat=0就去执行调度
   	 * 任务就绪，但时间片已用尽counter=0，也执行调度
