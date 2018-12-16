@@ -9,7 +9,7 @@ MM = mm/mm.o
 FS = fs/fs.o
 LIB = lib/lib.a
 MATH = kernel/math/math.a
-DRIVER = kernel/blk_drv/blk_drv.a
+DRIVER = kernel/blk_drv/blk_drv.a kernel/chr_drv/chr_drv.a
 
 Image:bootsect setup system
 	@dd if=boot/bootsect of=tools/a.img bs=512 count=1 seek=0 conv=notrunc
@@ -17,11 +17,11 @@ Image:bootsect setup system
 	@dd if=system of=tools/a.img bs=512  seek=5 conv=notrunc
 	@echo "\nmake done!\n"
 
-bootsect:boot/bootsect.s
-	as -o boot/bootsect.o boot/bootsect.s
+bootsect:boot/bootsect.S
+	as -o boot/bootsect.o boot/bootsect.S
 	ld -Ttext 0x0 --oformat binary -o boot/bootsect boot/bootsect.o
-setup:boot/setup.s
-	as -o boot/setup.o boot/setup.s
+setup:boot/setup.S
+	as -o boot/setup.o boot/setup.S
 	ld -Ttext 0x0 --oformat binary -o boot/setup boot/setup.o
 system:boot/head.o
 	@cd lib;make

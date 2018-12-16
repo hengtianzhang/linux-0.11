@@ -11,6 +11,8 @@ long volatile jiffies = 0;
 long startup_time = 0;
 struct task_struct *current;
 struct task_struct *last_task_used_math = NULL;
+unsigned char current_DOR = 0x0C;
+
 void schedule(void)
 {
 
@@ -27,4 +29,16 @@ void wake_up(struct task_struct **p)
 void sleep_on(struct task_struct ** p)
 {
 }
+void floppy_on(unsigned int nr)
+{}
+void floppy_off(unsigned int nr)
+{}
+void interruptible_sleep_on(struct task_struct **p)
+{}
+
+void add_timer(long jiffies, void (*fn)(void))
+{}
+
+int ticks_to_floppy_on(unsigned int nr)
+{}
 

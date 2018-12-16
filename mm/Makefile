@@ -7,7 +7,7 @@ obj = $(src:%.c=%.o)
 prom = mm.o
 
 $(prom):$(obj)
-	as -o page.o page.s
+	as -o page.o page.S
 	$(LD) -r -o $@ *.o
 
 %.o:%.c	

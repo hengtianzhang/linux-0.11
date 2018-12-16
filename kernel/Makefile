@@ -9,8 +9,9 @@ prom = kernel.o
 $(prom):$(obj)
 	@cd math;make
 	@cd blk_drv;make
-	as -o asm.o asm.s
-	as -o system_call.o system_call.s
+	@cd chr_drv;make
+	as -o asm.o asm.S
+	as -o system_call.o system_call.S
 	$(LD) -r -o $@  *.o
 
 %.o:%.c	
@@ -19,4 +20,5 @@ $(prom):$(obj)
 clean:
 	@cd math;make clean
 	@cd blk_drv;make clean
+	@cd chr_drv;make clean
 	rm -f *.o *.a

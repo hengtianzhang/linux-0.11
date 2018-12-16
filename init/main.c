@@ -118,7 +118,7 @@ int main(void)
    	mem_init(main_memory_start,memory_end); //主内存初始化
 	trap_init(); //陷阱門(硬件中斷向量)初始化
  	blk_dev_init(); //塊設備初始化
- 	check_data32(1,1);
+ 	chr_dev_init(); //字符设备初始化
 }
 
 
