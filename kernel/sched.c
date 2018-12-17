@@ -292,12 +292,130 @@ void add_timer(long jiffies, void (*fn)(void))
 }
 
 
+/*任务切换*/
+void do_timer(long cpl)
+{
+	extern int beepcount;
+	extern void sysbeepstop(void);
+	if (beepcount)
+		if (!--beepcount)
+			sysbeepstop();
+	if (cpl)
+		current->utime++;
+	else 
+		current->stime++;
+//存在定时器，则将链表第一个定时器减1，为0则调用处理程序，去掉该定时器
+	if (next_timer) {
+		next_timer->jiffies--;
+		while (next_timer && next_timer->jiffies <= 0) {
+			void (*fn)(void);
+			fn = next_timer->fn;
+			next_timer->fn = NULL;
+			next_timer = next_timer->next;
+			(fn)();
+		}
+	}
+	if (current_DOR & 0xf0)
+		do_floppy_timer();
+	//如果进程运行时间还没完，则推出。否则置当前任务运行计数值0
+	if ((--current->counter) > 0) return;
+	current->counter = 0;
+	if (!cpl) return; //内核态程序不依赖counter值进行调度
+	schedule();
+}
 
-void do_timer()
-{}
+
+//系统调用功能，设置报警定时时间值(秒)
+int sys_alarm(long seconds)
+{
+	int old = current->alarm;
+	if (old)
+		old = (old - jiffies) / HZ;
+	current->alarm = (seconds>0)?(jiffies+HZ*seconds):0;
+	return (old);
+}
+
+//取当前进程号pid
+int sys_getepid(void)
+{
+	return current->pid;
+}
+
+//取父进程号ppid
+int sys_getppid(void)
+{
+	return current->father;
+}
+
+//取用户号uid
+int sys_getuid(void)
+{
+	return current->uid;
+}
+
+//取有效的用户号
+int sys_geteuid(void)
+{
+	return current->uid;
+}
+
+//取组号gid
+int sys_getgid(void)
+{
+	return current->gid;
+}
+
+//取有效组号
+int sys_getegid(void)
+{
+	return current->egid;
+}
+
+//系统调用 降低对CPU的使用优先权
+int sys_nice(long increment)
+{
+	if (current->priority - increment > 0 && increment > 0)
+		current->priority -= increment;
+	return 0;
+}
+
 
 void sched_init(void)
-{}
+{
+	int i;
+	struct desc_struct * p;
+	if (sizeof(struct sigaction) != 16)
+		panic("Struct sigaction MUST be 16 bytes");
+	set_tss_desc(gdt+FIRST_TSS_ENTRY, & (init_task.task.tss));
+	set_ldt_desc(gdt+FIRST_LDT_ENTRY, & (init_task.task.ldt));
+	//清任务数组和描述符表项
+	p = gdt+2+FIRST_TSS_ENTRY;
+	for (i = 1; i < NR_TASKS; i++) {
+		task[i] = NULL;
+		p->a = p->b = 0;
+		p++;
+		p->a = p->b = 0;
+		p++;
+	}
+	//清除标志寄存器位NT。 NT用于控制程序的递归调用。置位 那当前中断任务
+	//执行iret时就会引起任务切换，NT指出TSS中back_line字段是否有效
+	__asm__("pushfl ; andl $0xffffbfff,(%esp) ; popfl"); //NT复位
+	//加载任务0的TSS LDT。只需一次。后续新任务CPU根据TSS中LDT项自动加载
+	ltr(0);
+	lldt(0);
+
+	//初始化8253定时器 通道0.工作方式3 二进制计数 IRQ0。10ms LATCH是初始值
+	outb_p(0x36,0x43);
+	outb_p(LATCH & 0xff, 0x40);
+	outb_p(LATCH >> 8, 0x40);
+
+	//设置时钟中断处理句柄，时钟中断门，修改中断控制器屏蔽码。允许时钟中断
+	//设置系统调用中断门
+	set_intr_gate(0x20,&timer_interrupt);
+	outb(inb_p(0x21)&~0x01,0x21);
+	set_system_gate(0x80,&system_call);
+	
+}
 
 
 
