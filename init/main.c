@@ -94,7 +94,6 @@ static long main_memory_start = 0;      /*主内存(将用于分页)开始的位
 struct drive_info { char dummy[32]; } drive_info; //用于存放硬盘参数表
 
 
-
 int main(void)
 {
 	ROOT_DEV = ORIG_ROOT_DEV; //文件系统
@@ -122,6 +121,7 @@ int main(void)
  	tty_init();
  	time_init(); //設置開機時間
 	sched_init(); //加載任務0
+	
 }
 
 

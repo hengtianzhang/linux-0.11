@@ -3,7 +3,7 @@
  * 調用tty_write信息取自fs寄存器 而内核信息只想内核數據段
  * 故需要使用ds 而臨時使用fs
  */
-#if 0
+#if 1
 void  check_data32(int value, int pos)
 {
 __asm__ __volatile__(
