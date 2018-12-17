@@ -121,12 +121,26 @@ int main(void)
  	tty_init();
  	time_init(); //設置開機時間
 	sched_init(); //加載任務0
+	buffer_init(buffer_memory_end);
+	hd_init();
+	floppy_init();
+	sti();
+
+	//通过堆栈中设置的参数，利用终端返回指令启动任务0
+	move_to_user_mode();
+	if (!fork()) {
+		init();
+	}
+	for (;;) pause();
 	
 }
 
 
 
-
+void init()
+{
+	for (;;);
+}
 
 
 

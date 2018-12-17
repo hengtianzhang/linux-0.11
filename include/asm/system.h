@@ -31,7 +31,7 @@ __asm__("movl %%esp,%%eax\n\t" \
 		"movw %%ax,%%es\n\t" \
 		"movw %%ax,%%fs\n\t" \
 		"movw %%ax,%%gs" \
-		:::"ax")
+		:::)
 
 
  #define sti() __asm__("sti"::)  //开中断

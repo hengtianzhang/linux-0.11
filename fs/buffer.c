@@ -178,26 +178,184 @@ struct buffer_head * get_hash_table(int dev, int block)
 }
 
 
+//用于同时判断缓冲区的修改标志和锁定标志，并且定义修改的权重比锁定大
+#define BADNESS(bh) (((bh)->b_dirt<<1)+(bh)->b_lock)
 
-
-
-
-
-
-void bread_page(unsigned long address,int dev,int b[4])
+//取高速缓冲中指定块
+struct buffer_head * getblk(int dev, int block)
 {
+	struct buffer_head * tmp, * bh;
+repeat:
+	if (bh = get_hash_table(dev,block))
+		return bh;
+	tmp = free_list;
+	do {
+		if (tmp->b_count)
+			continue;
+		if (!bh || BADNESS(tmp) < BADNESS(bh)) {
+			bh = tmp;
+			if (!BADNESS(tmp))
+				break;
+		}
+	} while ((tmp = tmp->b_next_free) != free_list);
 
-}
-struct buffer_head * bread(int dev,int block)
-{
+	if (!bh) {
+		sleep_on(&buffer_wait);
+		goto repeat;
+	}
+
+	//ok find
+	wait_on_buffer(bh);
+	if (bh->b_count)
+		goto repeat;
+	while (bh->b_dirt) {
+		sync_dev(bh->b_dev);
+		wait_on_buffer(bh);
+		if (bh->b_count)
+			goto repeat;
+	}
+
+	if (find_buffer(dev,block))
+		goto repeat;
+
+	//ok 唯一的块
+	bh->b_count = 1;
+	bh->b_dirt = 0;
+	bh->b_uptodate = 0;
+	remove_from_queues(bh);
+	bh->b_dev = dev;
+	bh->b_blocknr = block;
+	insert_into_queues(bh);
+	return bh;
 }
 
+
+//释放指定缓冲块
 void brelse(struct buffer_head * buf)
 {
+	if (!buf)
+		return;
+	wait_on_buffer(buf);
+	if (!(buf->b_count--))
+		panic("Trying to free free buffer");
+	wake_up(&buffer_wait);
 }
+
+//从设备上读取指定的数据块并返回
+struct buffer_head * bread(int dev,int block)
+{
+	struct buffer_head * bh;
+
+	if (!(bh = getblk(dev,block)))
+		panic("bread: getblk returnned NULL\n");
+	if (bh->b_uptodate)
+		return bh;
+	ll_rw_block(READ, bh);
+	wait_on_buffer(bh);
+	if (bh->b_uptodate)
+		return bh;
+	brelse(bh);
+	return NULL;
+}
+
+//复制内存块
+#define COPYBLK(from,to) \
+__asm__("cld\n\t" \
+	"rep\n\t" \
+	"movsl\n\t" \
+	::"c" (BLOCK_SIZE/4),"S" (from),"D" (to) \
+	:)
+
+//读一页数据 4块 
+void bread_page(unsigned long address,int dev,int b[4])
+{
+	struct buffer_head * bh[4];
+	int i;
+	for (i = 0; i < 4; i++)
+		if (b[i]) {
+			if (bh[i] = getblk(dev,b[i]))
+				if (!bh[i]->b_uptodate)
+					ll_rw_block(READ,bh[i]);
+		} else
+			bh[i] = NULL;
+	for (i = 0; i < 4; i++, address += BLOCK_SIZE)
+		if (bh[i]) {
+			wait_on_buffer(bh[i]);
+			if (bh[i]->b_uptodate)
+				COPYBLK((unsigned long) bh[i]->b_data,address);
+			brelse(bh[i]);
+		}
+}
+
+//从指定设备读取指定的一些块
 struct buffer_head * breada(int dev,int first, ...)
 {
-
+	va_list args;
+	struct buffer_head * bh, *tmp;
+	va_start(args,first);
+	if (!(bh = getblk(dev, first)))
+		panic("bread: getblk returnned NULL\n");
+	if (!bh->b_uptodate)
+		ll_rw_block(READ, bh);
+	while ((first = va_arg(args,int)) >= 0) {
+		tmp = getblk(dev, first);
+		if (tmp) {
+			if (!tmp->b_uptodate)
+				ll_rw_block(READA,tmp);
+			tmp->b_count--;
+		}
+	}
+	va_end(args);
+	wait_on_buffer(bh);
+	if (bh->b_uptodate)
+		return bh;
+	brelse(bh);
+	return NULL;
 }
+
+
+//缓冲区初始化
+void buffer_init(long buffer_end)
+{
+	struct buffer_head * h = start_buffer;
+	void * b;
+	int i;
+	if (buffer_end == 1 << 20) //1MB 640KB-1MB 显存BIOS占用
+		b = (void *) (640*1024);
+	else
+		b = (void *) buffer_end;
+//从高端开始划分1KB缓冲块，低端建立对应buufer_head结构
+	while ((b -= BLOCK_SIZE) >= ((void *) (h + 1))) {
+		h->b_dev = 0; //使用该缓冲区设备号
+		h->b_dirt = 0;
+		h->b_count = 0;
+		h->b_lock = 0;
+		h->b_uptodate = 0; //缓冲区块更新标志 （有效标志）
+		h->b_wait = NULL;
+		h->b_next = NULL;
+		h->b_prev = NULL;
+		h->b_data = (char *) b; //对应缓冲区块
+		h->b_prev_free = h + 1;
+		h->b_next_free = h + 1; //指向链表下一项
+		h++;
+		NR_BUFFERS++;//缓冲区块累加
+		if (b == (void *) 0x100000) //若递减到1MB，跳过384KB
+			b = (void *) 0xA0000; //640KB
+	}
+	h--; //让h指向最后一个有效项
+	free_list = start_buffer; //让空闲链表指向最后一个有效缓冲头
+	free_list->b_prev_free = h;
+	h->b_next_free = free_list;
+	//初始化hash表
+	for (i = 0; i < NR_HASH; i++)
+		hash_table[i] = NULL;
+}
+
+
+
+
+
+
+
 
 
