@@ -131,7 +131,7 @@ int main(void)
 		init();
 	}
 	for (;;) pause();
-	
+
 }
 
 
