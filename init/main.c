@@ -125,7 +125,6 @@ int main(void)
 	hd_init();
 	floppy_init();
 	sti();
-
 	//通过堆栈中设置的参数，利用终端返回指令启动任务0
 	move_to_user_mode();
 	if (!fork()) {
