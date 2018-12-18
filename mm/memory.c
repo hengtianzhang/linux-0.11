@@ -53,7 +53,7 @@ unsigned long get_free_page(void)
 {
 register unsigned long __res asm("ax");
 
-__asm__("cld ; repne ; scasb\n\t" //置方向位。al(0)与每个页面的(di)内容比较
+__asm__("std ; repne ; scasb\n\t" //置方向位。al(0)与每个页面的(di)内容比较
 		"jne 1f\n\t" //没有则结束
 		"movb $1,1(%%edi)\n\t" //将对应页面内存映像比特位置1
 		"sall $12,%%ecx\n\t" //页面数*4K = 相对页面起始地址

@@ -136,9 +136,9 @@ int main(void)
 
 
 
-void init()
+void init(void)
 {
-
+	printk("aaaaaaaaaaaaaaaaaaaaa\n");
 }
 
 
