@@ -23,7 +23,7 @@ static void init(int port)
 	outb_p(0x0b,port+4);
 	outb_p(0x0d,port+1);//除写以外，允许所有中断源中断
 
-	(void)inb_p(port);
+	(void)inb(port);
 }
 
 //初始化串口中断程序和串行接口
@@ -33,7 +33,7 @@ void rs_init(void)
 	set_intr_gate(0x23,rs2_interrupt); //串口2 IRQ3
 	init(tty_table[1].read_q.data);//.data 端口基址
 	init(tty_table[2].read_q.data);
-	outb(inb_p(0x2)&0xE7,0x21); //允许主8259A响应IRQ3 IRQ4
+	outb(inb_p(0x21)&0xE7,0x21); //允许主8259A响应IRQ3 IRQ4
 }
 
 /*tty_write以将数据写入队列调用此函数。串行数据发送输出*/

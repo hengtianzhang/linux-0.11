@@ -63,7 +63,6 @@ static void die(char * str, long esp_ptr, long nr)
 {
 	long * esp = (long *) esp_ptr;
 	int i;
-
 	printk("%s: %04x\n\r", str, nr&0xffff);
 	/* esp[1] 段选择符CS esp[0] eip
      * esp[2] eflags

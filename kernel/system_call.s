@@ -211,10 +211,8 @@ timer_interrupt:
 	movl $0x17, %eax
 	mov %ax, %fs
 	incl jiffies
-
 	movb $0x20, %al #EOI to interrupt controller
 	outb %al, $0x20
-
 	/*从堆栈中取出执行系统调用代码的选择符CS中的当前特权级
 	 *并压入 作为do_timer参数。
 	 */
@@ -222,7 +220,7 @@ timer_interrupt:
 	andl $3, %eax
 	pushl %eax
 	call do_timer
-	andl $4, %esp
+	addl $4, %esp
 	jmp ret_from_sys_call
 
 	/*sys_execve()系统调用*/

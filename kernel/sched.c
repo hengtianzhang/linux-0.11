@@ -407,7 +407,7 @@ void sched_init(void)
 	//初始化8253定时器 通道0.工作方式3 二进制计数 IRQ0。10ms LATCH是初始值
 	outb_p(0x36,0x43);
 	outb_p(LATCH & 0xff, 0x40);
-	outb_p(LATCH >> 8, 0x40);
+	outb(LATCH >> 8, 0x40);
 
 	//设置时钟中断处理句柄，时钟中断门，修改中断控制器屏蔽码。允许时钟中断
 	//设置系统调用中断门
