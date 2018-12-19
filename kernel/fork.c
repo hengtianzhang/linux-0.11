@@ -68,6 +68,7 @@ int copy_process(int nr,long ebp,long edi,long esi,long gs,long none,
 	if (!p)
 		return -EAGAIN;
 	task[nr] = p;
+	__asm__ volatile("cld\n\t");
 	*p = *current;
 	//将复制来的进程结构进行修改。首先置为不可中断等待，以防止内核调度其执行
 	p->state = TASK_UNINTERRUPTIBLE;
@@ -121,7 +122,7 @@ int copy_process(int nr,long ebp,long edi,long esi,long gs,long none,
 		current->executable->i_count++;
 	set_tss_desc(gdt+(nr<<1)+FIRST_TSS_ENTRY,&(p->tss));
 	set_ldt_desc(gdt+(nr<<1)+FIRST_LDT_ENTRY,&(p->ldt));
-
+	p->state = TASK_RUNNING;
 	return last_pid;
 }
 
