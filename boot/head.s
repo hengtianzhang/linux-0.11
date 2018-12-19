@@ -47,7 +47,7 @@ check_x87:
 	fninit     #向協處理器發出初始化指令
 	fstsw %ax  #取處理器狀態字到ax
 	cmpb $0, %al #初始化后狀態字應該爲0，否則協處理器不存在
-	jz 1f      #存在則跳轉至1
+	je 1f      #存在則跳轉至1
 	movl %cr0, %eax #不存在則reset MP set EM
 	xorl $6, %eax
 	movl %eax, %cr0
