@@ -89,17 +89,20 @@ static void die(char * str, long esp_ptr, long nr)
 /*asm.s中对应的中断处理程序调用的C函数*/
 void do_double_fault(long esp, long error_code)
 {
-	die("double fault",esp,error_code);
+	printk("double fault");
+	die("",esp,error_code);
 }
 
 void do_general_protection(long esp, long error_code)
 {
-	die("general protection",esp,error_code);
+	printk("general protection");
+	die("",esp,error_code);
 }
 
 void do_divide_error(long esp, long error_code)
 {
-	die("divide error",esp,error_code);
+	printk("divide error");
+	die("",esp,error_code);
 }
 
 void do_int3(long * esp, long error_code,
@@ -121,64 +124,76 @@ void do_int3(long * esp, long error_code,
 
 void do_nmi(long esp, long error_code)
 {
-	die("nmi",esp,error_code);
+	printk("nmi");
+	die("",esp,error_code);
 }
 
 void do_debug(long esp, long error_code)
 {
-	die("debug",esp,error_code);
+	printk("debug");
+	die("",esp,error_code);
 }
 
 void do_overflow(long esp, long error_code)
 {
-	die("overflow",esp,error_code);
+	printk("overflow");
+	die("",esp,error_code);
 }
 
 void do_bounds(long esp, long error_code)
 {
-	die("bounds",esp,error_code);
+	printk("bounds");
+	die("",esp,error_code);
 }
 
 void do_invalid_op(long esp, long error_code)
 {
-	die("invalid operand",esp,error_code);
+	printk("invalid operand");
+	die("",esp,error_code);
 }
 
 void do_device_not_available(long esp, long error_code)
 {
-	die("device not available",esp,error_code);
+	printk("device not available");
+	die("",esp,error_code);
 }
 
 void do_coprocessor_segment_overrun(long esp, long error_code)
 {
-	die("coprocessor segment overrun",esp,error_code);
+	printk("coprocessor segment overrun");
+	die("",esp,error_code);
 }
 
 void do_invalid_TSS(long esp,long error_code)
 {
-	die("invalid TSS",esp,error_code);
+	printk("invalid TSS");
+	die("",esp,error_code);
 }
 
 void do_segment_not_present(long esp,long error_code)
 {
-	die("segment not present",esp,error_code);
+	printk("segment not present");
+	die("",esp,error_code);
 }
 
 void do_stack_segment(long esp,long error_code)
 {
-	die("stack segment",esp,error_code);
+	printk("stack segment");
+	die("",esp,error_code);
 }
 
 void do_coprocessor_error(long esp, long error_code)
 {
 	if (last_task_used_math != current)
 		return;
-	die("coprocessor error",esp,error_code);
+	printk("coprocessor error");
+	die("",esp,error_code);
 }
 
 void do_reserved(long esp, long error_code)
 {
-	die("reserved (15,17-47) error",esp,error_code);
+	printk("reserved (15,17-47) error");
+	die("",esp,error_code);
 }
 
 void trap_init(void)

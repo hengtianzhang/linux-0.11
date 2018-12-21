@@ -138,7 +138,7 @@ int main(void)
 
 void init(void)
 {
-
+	setup((void *) &drive_info);
 }
 
 
