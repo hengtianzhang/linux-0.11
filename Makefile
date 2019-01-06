@@ -1,52 +1,73 @@
+VERSION = 1
+
+ROOT_DIR = $(shell pwd)
+CUR_DIR = .
+
+MAKE = make
 CC = gcc
+CPP = $(CC) -E -nostdinc -traditional -I$(ROOT_DIR)/include
 LD = ld
-GCCVERSION = $(shell gcc --version | grep ^gcc | sed 's/^.* //g')
-OSVERSION = $(shell getconf LONG_BIT)
-CFLAGE =-std=gnu89 -Wall -O -fstrength-reduce -fomit-frame-pointer  -fno-stack-protector  -nostdinc -I./include -I./include/linux -I./include/asm -I./include/sys
-all:Image
-KERNEL = kernel/kernel.o
-MM = mm/mm.o
-FS = fs/fs.o
-LIB = lib/lib.a
-MATH = kernel/math/math.a
-DRIVER = kernel/blk_drv/blk_drv.a kernel/chr_drv/chr_drv.a
+AR = ar
+AS = as
+OBJDUMP = objdump
+OBJCOPY = objcopy
+NM =nm
 
-Image:bootsect setup system
-	@dd if=boot/bootsect of=tools/a.img bs=512 count=1 seek=0 conv=notrunc
-	@dd if=boot/setup of=tools/a.img bs=512 count=4 seek=1 conv=notrunc
-	@dd if=system of=tools/a.img bs=512  seek=5 conv=notrunc
-	@echo "\nmake done!\n"
+CDFLAGS =-m32 -march=i386 -Os -Wall -Wstrict-prototypes -fno-strict-aliasing -fomit-frame-pointer -fno-pic -fno-stack-protector -pipe
+CDIR = -nostdinc -I$(ROOT_DIR)/include
+CHECKFLAGS = -D__KERNEL__
+LDFLAGS = -m elf_i386 -M -Ttext 0x0
+OBJ = 
+#all:Image 
+all: system.bin system.list system.syms
+#Image: $(ROOT_DIR)/boot/bootsect.bin $(ROOT_DIR)/boot/setup.bin $(ROOT_DIR)/tool/system.bin
 
-bootsect:boot/bootsect.S
-	as -o boot/bootsect.o boot/bootsect.S
-	ld -Ttext 0x0 --oformat binary -o boot/bootsect boot/bootsect.o
-setup:boot/setup.S
-	as -o boot/setup.o boot/setup.S
-	ld -Ttext 0x0 --oformat binary -o boot/setup boot/setup.o
-system:boot/head.o
-	@cd lib;make
-	@cd kernel;make
-	@cd mm;make
-	@cd fs;make
-	$(CC) $(CFLAGE) -c -o init/main.o init/main.c
-	$(LD) -nostdinc -M -Ttext 0x0 boot/head.o init/main.o $(MM)  $(KERNEL) \
-	$(FS) $(DRIVER) $(MATH) $(LIB) --oformat binary -o system > system.map
-	objdump -D -b binary -m i386 system > system.list
+tool/system.bin: system.elf
+	$(OBJCOPY) -R .note -R .comment -S -O binary $< $@
+system.list:system.elf
+	$(OBJDUMP) -D -x -f -m i386 $< > $@
+system.syms:system.elf
+	$(NM) -l -n $< > $@
+system.elf:$(OBJ)
+	$(LD) $(LDFLAGS) -o $@ $^ >system.map
 
-main.o:init/main.o
-	$(CC) $(CFLAGE) -c -o init/main.o init/main.c
+.PHONY: clean
 
-gcc_check:
-	@if [ "5.4.0" > $(GCCVERSION) ]; then echo "******check failed*******!\n\
-GCC version requires at least GCC 5.4.0,but this \
-is GCC $(GCCVERSION)";else echo \
-"****check sucessful****\nGCC version is gcc $(GCCVERSION)";fi
-	@rm -rf $(GCCVERSION)
 clean:
-	@(cd kernel;make clean)
-	@(cd mm;make clean)
-	@(cd lib;make clean)
-	@(cd fs;make clean)
-	rm -f boot/bootsect  boot/setup  boot/*.o init/main.o init/main.s system \
-	system.list system.map
-	@echo "\nrm -rf obj file done!\n"
+	@find $(CUR_DIR) -name *.o -exec echo cleaning {} \;
+	@find $(CUR_DIR) -name *.a -exec echo cleaning {} \;
+	@find $(CUR_DIR) -name *.o -exec rm -f {} \;
+	@find $(CUR_DIR) -name *.a -exec rm -f {} \;
+	@echo "\ndelete midware file done!\n"
+
+
+
+
+
+
+
+ROOT_DIR = $(shell pwd)
+CUR_DIR = .
+MAKE = make
+CC = gcc
+CPP = $(CC) -E
+LD = ld
+LDFLAGS = -m elf_i386 -M -Ttext 0x0
+CFLAGS = -m32 -march=i386 -Os -Wall -Wstrict-prototypes -fno-strict-aliasing -fomit-frame-pointer -fno-pic -fno-stack-protector \
+		 -pipe
+CDIR = -nostdinc -I$(ROOT_DIR)/include
+CHECKFLAGS = -D__KERNEL__
+SRC = $(wildcard *.c)
+OBJ = $(patsubst %.c, %.o $(SRC))
+%.o:%.c
+	CPP -traditional keyboard.S -o cppkeyboard.s
+	ld -r -o $@ &^
+	ld -Text 0x0 --oformat binary
+	AR rcs
+	objcopy -R .note -R .comment -S -O binary src.elf obj.bin
+	objdump -D -x -f -m i386 obj.elf > sys.list
+	nm -l -n obj.elf > sys.syms
+lib:
+		$(MAKE) -C $(ROOT_DIR)
+
+.PHONY: clean
