@@ -22,10 +22,13 @@ export CC CPP LD AR AS CFLAGS CDIR CHECKFLAGS
 OBJ =boot/head.o init/main.o fs/fs.o kernel/kernel.o mm/mm.o \
 kernel/blk_drv/blk_drv.a kernel/chr_drv/chr_drv.a kernel/math/math.a \
 lib/lib.a
-#all:Image 
-all: system.bin system.list system.syms
+all:system.list system.syms Image
 	@echo "\nmake all done!\n"
-#Image: $(ROOT_DIR)/boot/bootsect.bin $(ROOT_DIR)/boot/setup.bin $(ROOT_DIR)/tool/system.bin
+
+Image: boot/bootsect.bin boot/setup.bin system.bin
+	@$(CC) -o tools/build tools/build.c
+	@./tools/build
+	@cat boot/bootsect.bin boot/setup.bin appending.bin system.bin > Image
 
 system.bin: system.elf
 	$(OBJCOPY) -R .note -R .comment -S -O binary $< $@
@@ -36,9 +39,20 @@ system.syms:system.elf
 system.elf:$(OBJ)
 	$(LD) $(LDFLAGS) -o $@ $^ > system.map
 
+boot/bootsect.bin:boot/bootsect.o
+	$(LD) -Ttext 0x0 --oformat binary -o $@ $<
+boot/bootsect.o:boot/bootsect.s
+	$(AS) -o $@ $<
+boot/setup.bin:boot/setup.o
+	$(LD) -Ttext 0x0 --oformat binary -o $@ $<
+boot/setup.o:boot/setup.s
+	$(AS) -o $@ $<
 boot/head.o:boot/head.s
 	$(AS) -o $@ $<
 
+disk:Image
+	dd if=Image of=tools/a.img bs=512 seek=0 conv=notrunc
+	
 %.o:%.c
 	$(CC) $(CFLAGS) $(CDIR) -c -o $@ $<
 
@@ -65,5 +79,10 @@ clean:
 	@find $(CUR_DIR) -name *.o -exec rm -f {} \;
 	@find $(CUR_DIR) -name *.a -exec rm -f {} \;
 	@rm -rf system.*
+	@rm -rf tools/build
+	@rm -rf boot/bootsect.bin
+	@rm -rf boot/setup.bin
+	@rm -rf appending.bin
+	@rm -rf Image
 	@echo "\ndelete midware file done!\n"
 
