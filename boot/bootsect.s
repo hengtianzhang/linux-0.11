@@ -7,7 +7,7 @@ INITSEG  = 0x9000
 SETUPSEG = 0x9020
 SYSSEG   = 0x1000
 ENDSEG   = SYSSEG + SYSSIZE
-ROOT_DEV = 0x306 
+ROOT_DEV = 0x301 
 .global _start
 _start:
 	movw $BOOTSEG, %ax    #bootsect加载地址 0x7c00

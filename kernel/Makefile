@@ -1,24 +1,12 @@
-CC = gcc
-AR = ar
-LD = ld
-CFLAGE =-std=gnu89 -Wall -O -fstrength-reduce -fomit-frame-pointer  -fno-stack-protector -nostdinc -I../include -I../include/linux -I../include/asm -I../include/sys
-src = $(shell find ./ -name "*.c")
-obj = $(src:%.c=%.o)
-prom = kernel.o
+SRC = $(wildcard *.c)
+OBJ = $(patsubst %.c, %.o, $(SRC))
 
-$(prom):$(obj)
-	@cd math;make
-	@cd blk_drv;make
-	@cd chr_drv;make
-	as -o asm.o asm.S
-	as -o system_call.o system_call.S
-	$(LD) -r -o $@  *.o
-
-%.o:%.c	
-	$(CC) $(CFLAGE) -c -o $@ $<
-
-clean:
-	@cd math;make clean
-	@cd blk_drv;make clean
-	@cd chr_drv;make clean
-	rm -f *.o *.a
+kernel.o:$(OBJ) asm.o system_call.o
+	$(LD) -m elf_i386 -r -o $@ $^
+%.o:%.c
+	$(CC) $(CFLAGS) $(CDIR) -c -o $@ $<
+	
+asm.o:asm.S
+	$(AS) -o $@ $<
+system_call.o:system_call.S
+	$(AS) -o $@ $<

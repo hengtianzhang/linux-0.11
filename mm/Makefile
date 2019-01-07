@@ -1,16 +1,10 @@
-AR = ar
-CC = gcc
-LD = ld
-CFLAGE =-std=gnu89 -Wall -O -fstrength-reduce -fomit-frame-pointer  -fno-stack-protector -nostdinc -I../include -I../include/linux -I../include/asm -I../include/sys
-src = $(shell find ./ -name "*.c")
-obj = $(src:%.c=%.o)
-prom = mm.o
+SRC = $(wildcard *.c)
+OBJ = $(patsubst %.c, %.o, $(SRC))
 
-$(prom):$(obj)
-	as -o page.o page.S
-	$(LD) -r -o $@ *.o
-
-%.o:%.c	
-	$(CC) $(CFLAGE) -c -o $@ $<
-clean:
-	rm -f *.o *.a
+mm.o:$(OBJ) page.o
+	$(LD) -m elf_i386 -r -o $@ $^
+%.o:%.c
+	$(CC) $(CFLAGS) $(CDIR) -c -o $@ $<
+	
+page.o:page.S
+	$(AS) -o $@ $<

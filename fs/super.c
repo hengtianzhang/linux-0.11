@@ -1,4 +1,4 @@
-#include <fs.h>
+#include <linux/fs.h>
 int ROOT_DEV = 0;
 
 struct super_block super_block[NR_SUPER];

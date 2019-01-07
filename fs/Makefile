@@ -1,16 +1,9 @@
-CC = gcc
-AR = ar
-LD = ld
-CFLAGE =-std=gnu89 -Wall -O -fstrength-reduce -fomit-frame-pointer -fno-stack-protector -nostdinc  -I../include -I../include/linux -I../include/asm -I../include/sys
-src = $(shell find ./ -name "*.c")
-obj = $(src:%.c=%.o)
-prom = fs.o
 
-$(prom):$(obj)
-	$(LD) -r -o $@  *.o
+SRC = $(wildcard *.c)
+OBJ = $(patsubst %.c, %.o, $(SRC))
 
-%.o:%.c	
-	$(CC) $(CFLAGE) -c -o $@ $<
+fs.o:$(OBJ)
+	$(LD) -m elf_i386 -r -o $@ $^
 
-clean:
-	rm -f *.o *.a
+%.o:%.c
+	$(CC) $(CFLAGS) $(CDIR) -c -o $@ $<

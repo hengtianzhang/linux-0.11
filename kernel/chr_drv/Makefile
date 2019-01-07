@@ -1,20 +1,15 @@
-CC = gcc
-AR = ar
-LD = ld
-CPP = gcc -E -nostdinc -I../../include -I../../include/linux -I../../include/asm -I../../include/sys
-CFLAGE =-std=gnu89 -Wall -O -fstrength-reduce -fomit-frame-pointer  -fno-stack-protector -nostdinc -I../../include -I../../include/linux -I../../include/asm -I../../include/sys
-src = $(shell find ./ -name "*.c")
-obj = $(src:%.c=%.o)
-prom = chr_drv.a
+SRC = $(wildcard *.c)
+OBJ = $(patsubst %.c, %.o, $(SRC))
 
-$(prom):$(obj)
-	$(CPP) -traditional keyboard.S -o cppkeyboard.s
-	as -o keyboard.o cppkeyboard.s
-	as -o rs_io.o rs_io.s
-	$(AR) rcs -o $@  *.o
-	sync
-%.o:%.c	
-	$(CC) $(CFLAGE) -c -o $@ $<
 
-clean:
-	rm -f *.o *.a cppkeyboard.s
+chr_drv.a:$(OBJ) keyboard.o rs_io.o
+	$(AR) rcs -o $@ $^
+%.o:%.c
+	$(CC) $(CFLAGS) $(CDIR) -c -o $@ $<
+keyboard.o:keyboard.S
+	$(CPP) -o cppkeyboard.s $<
+	$(AS) -o $@ cppkeyboard.s
+	@rm cppkeyboard.s
+rs_io.o:rs_io.S
+	$(AS) -o $@ $<
+	
