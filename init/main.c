@@ -97,6 +97,7 @@ struct drive_info { char dummy[32]; } drive_info; //用于存放硬盘参数表
 int main(void)
 {
 	ROOT_DEV = ORIG_ROOT_DEV; //文件系统
+  __asm__("cld");
 	drive_info = DRIVE_INFO; //硬盘参数表
 	memory_end = (1<<20) + (EXT_MEM_K<<10); /*内存大小=1MB + 扩展内存（k）*1024*/
 	memory_end &= 0xfffff000;                /*忽略不到4kb的内存数*/
@@ -138,6 +139,7 @@ int main(void)
 
 void init(void)
 {
+  setup((void *) &drive_info);
 }
 
 
