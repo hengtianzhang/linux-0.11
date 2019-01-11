@@ -137,6 +137,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 				precision = skip_atoi(&fmt);
 			else if (*fmt == '*') {
 				/* it's the next argument */
+				++fmt;
 				precision = va_arg(args, int);
 			}
 			if (precision < 0)
