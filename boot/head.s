@@ -177,6 +177,7 @@ setup_paging:
 	movl %cr0, %eax
 	orl $0x80000000, %eax  #PG位set 1
 	movl %eax, %cr0
+	cld
 	ret                   #刷新指令队列
 	
 .align 4 

@@ -68,7 +68,6 @@ int copy_process(int nr,long ebp,long edi,long esi,long gs,long none,
 	if (!p)
 		return -EAGAIN;
 	task[nr] = p;
-	__asm__ volatile("cld\n\t");
 	*p = *current;
 	//将复制来的进程结构进行修改。首先置为不可中断等待，以防止内核调度其执行
 	p->state = TASK_UNINTERRUPTIBLE;

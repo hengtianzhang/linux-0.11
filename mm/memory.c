@@ -63,7 +63,8 @@ __asm__("std ; repne ; scasb\n\t" //置方向位。al(0)与每个页面的(di)�
 		"leal 4092(%%edx),%%edi\n\t" //该页面的末端
 		"rep ; stosl\n\t" //将该页面清零
 		"movl %%edx,%%eax\n"
-		"1:"
+		"1:\n\t"
+		"cld"
 		:"=a" (__res)
 		: "0" (0), "i" (LOW_MEM), "c" (PAGING_PAGES),
 		"D" (mem_map+PAGING_PAGES-1)

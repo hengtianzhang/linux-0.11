@@ -224,7 +224,7 @@ static void hd_out(unsigned int drive,unsigned int nsect,unsigned int sect,
 	/*對參數進行有效性檢測。如果驅動器號大於1 只能是0，1 或者磁頭號
 	  大於15 則進程不支持停機。否則判斷並循環等待驅動器就緒
 	*/
-	if (drive > 1 || head > 5)
+	if (drive > 1 || head > 15)
 		panic("Trying to write bad sector");
 	if (!controller_ready())
 		panic("HD controller not ready");
