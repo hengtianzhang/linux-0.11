@@ -196,7 +196,7 @@ gdt_48:
 	.word 0x800 #gdt限長 2048 / 8 256個
 	.word 512 + gdt, 0x9
 msg:
-	.ascii "Enter the setup module... :)"
+	.ascii "Enter the setup module... :)\n\r"
 	len = . - msg
 
 .text
