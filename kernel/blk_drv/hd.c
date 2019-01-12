@@ -379,7 +379,6 @@ void do_hd_request(void)
 		reset_hd(CURRENT_DEV);
 		return ;
 	}
-
 	if (recalibrate) {
 		recalibrate = 0;
 		hd_out(dev, hd_info[CURRENT_DEV].sect,0,0,0,
