@@ -73,22 +73,22 @@ extern int sys_sgetmask();
 extern int sys_ssetmask();
 extern int sys_setreuid();
 extern int sys_setregid();
-fn_ptr sys_call_table[] = {sys_setup, 0, sys_fork, 0,
-0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0,
+fn_ptr sys_call_table[] = {sys_setup, 0, sys_fork, sys_read,
+sys_write, sys_open, sys_close, 0, sys_creat, sys_link,
+sys_unlink, sys_execve, 0, 0, 0, 0,
 0, 0, 0, 0, 0, sys_mount,
 sys_umount, 0, 0, 0, 0, sys_alarm,
 0, sys_pause, 0, 0, 0, 0,
 sys_nice, 0, sys_sync, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0,
+0, sys_dup, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0,
 0,0};
 
-/*
 
+/*
 fn_ptr sys_call_table[] = {sys_setup, sys_exit, sys_fork, sys_read,
 sys_write, sys_open, sys_close, sys_waitpid, sys_creat, sys_link,
 sys_unlink, sys_execve, sys_chdir, sys_time, sys_mknod, sys_chmod,

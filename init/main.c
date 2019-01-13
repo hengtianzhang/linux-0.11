@@ -135,10 +135,34 @@ int main(void)
 }
 
 
+static int printf(const char * fmt, ...)
+{
+	va_list args;
+	int i;
+
+	va_start(args, fmt);
+	write(1, printbuf, i = vsprintf(printbuf, fmt, args));
+	va_end(args);
+	return i;
+}
+
+static char * argv_rc[] = {"/bin/sh", NULL}; //调用执行程序时参数的字符串数组
+static char * envp_rc[] = {"HOME=/", NULL}; //调用执行程序时环境变量的字符串数组
+
+static char * argv[] = {"-/bin/sh", NULL};
+static char * envp[] = {"HOME=/usr/root", NULL};
 
 void init(void)
 {
+	int pid, i;
 	setup((void *) &drive_info);
+	(void) open("/dev/tty0", O_RDWR, 0);
+	(void) dup(0); //1 stdout
+	(void) dup(0); //2 stderr
+	printf("%d buffers = %d bytes buffer space\n\r", NR_BUFFERS,
+			NR_BUFFERS*BLOCK_SIZE);
+	printf("Free mem: %d bytes\n\r", memory_end - main_memory_start);
+
 }
 
 

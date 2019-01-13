@@ -174,11 +174,74 @@ int sys_umount(char * dev_name)
 	struct super_block * sb;
 	int dev;
 
+	if (!(inode = namei(dev_name)))
+		return -ENOENT;
+	dev = inode->i_zone[0];
+	if (!S_ISBLK(inode->i_mode)) {
+		iput(inode);
+		return -ENOTBLK;
+	}
+	iput(inode);
+	if (dev == ROOT_DEV)
+		return -EBUSY;
+
+	if (!(sb = get_super(dev)) || !(sb->s_imount))
+		return -ENOENT;
+	if (!sb->s_imount->i_mount)
+		printk("Mounted inode has i_mount=0\n");
+	for (inode = inode_table + 0; inode < inode_table + NR_INODE; inode++)
+		if (inode->i_dev == dev && inode->i_count)
+			return -EBUSY;
+	sb->s_imount->i_mount = 0;
+	iput(sb->s_imount);
+	sb->s_imount = NULL;
+	iput(sb->s_isup);
+	sb->s_isup = NULL;
+	put_super(dev);
+	sync_dev(dev);
+	return 0;
 }
 
 int sys_mount(char * dev_name, char * dir_name, int rw_flag)
 {
+	struct m_inode * dev_i, * dir_i;
+	struct super_block * sb;
+	int dev;
 
+	if (!(dev_i=namei(dev_name)))
+		return -ENOENT;
+	dev = dev_i->i_zone[0];
+	if (!S_ISBLK(dev_i->i_mode)) {
+		iput(dev_i);
+		return -EPERM;
+	}
+	iput(dev_i);
+	if (!(dir_i=namei(dir_name)))
+		return -ENOENT;
+	if (dir_i->i_count != 1 || dir_i->i_num == ROOT_INO) {
+		iput(dir_i);
+		return -EBUSY;
+	}
+	if (!S_ISDIR(dir_i->i_mode)) {
+		iput(dir_i);
+		return -EPERM;
+	}
+	if (!(sb=read_super(dev))) {
+		iput(dir_i);
+		return -EBUSY;
+	}
+	if (sb->s_imount) {
+		iput(dir_i);
+		return -EBUSY;
+	}
+	if (dir_i->i_mount) {
+		iput(dir_i);
+		return -EPERM;
+	}
+	sb->s_imount=dir_i;
+	dir_i->i_mount=1;
+	dir_i->i_dirt=1;		/* NOTE! we don't iput(dir_i) */
+	return 0;			/* we do that in umount */
 }
 
 

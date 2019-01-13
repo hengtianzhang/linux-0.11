@@ -13,7 +13,7 @@ OBJDUMP = objdump
 OBJCOPY = objcopy
 NM =nm
 
-CFLAGS =-m32 -march=i386 -O2 -Wall -Wstrict-prototypes -fno-strict-aliasing -fomit-frame-pointer -fno-pic -fno-stack-protector -pipe -fno-reorder-functions
+CFLAGS =-m32 -march=i386 -O1 -Wall -Wstrict-prototypes -fno-strict-aliasing -fomit-frame-pointer -fno-pic -fno-stack-protector -pipe -fno-reorder-functions
 CDIR = -nostdinc -I$(ROOT_DIR)/include
 CHECKFLAGS = -D__KERNEL__
 LDFLAGS =-m elf_i386 -M -Ttext 0x0

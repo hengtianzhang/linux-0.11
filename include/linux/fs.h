@@ -56,9 +56,11 @@ void buffer_init(long buffer_end);
 #define DIR_ENTRIES_PER_BLOCK ((BLOCK_SIZE)/(sizeof (struct dir_entry)))
 
 /*管道头 管道尾 管道大小 管道空 管道满 管道头指针递增*/
+
+
 #define PIPE_HEAD(inode) ((inode).i_zone[0])
 #define PIPE_TAIL(inode) ((inode).i_zone[1])
-#define PIPE_SIZE(inode) ((PIPE_HEAD(inode)-PIPE_TAIL(inode))&(PAGE_SIZE-1)
+#define PIPE_SIZE(inode) ((PIPE_HEAD(inode)-PIPE_TAIL(inode))&(PAGE_SIZE-1))
 #define PIPE_EMPTY(inode) (PIPE_HEAD(inode)==PIPE_TAIL(inode))
 #define PIPE_FULL(inode) (PIPE_SIZE(inode)==(PAGE_SIZE-1))
 #define INC_PIPE(head) \

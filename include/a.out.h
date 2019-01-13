@@ -211,7 +211,7 @@ struct relocation_info {
 	unsigned int r_length:2;
 	unsigned int r_extern:1;
 	unsigned int r_pad:4;
-}
+};
 #endif
 
 #endif
