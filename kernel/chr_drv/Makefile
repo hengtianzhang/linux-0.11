@@ -10,6 +10,6 @@ keyboard.o:keyboard.S
 	$(CPP) -o cppkeyboard.s $<
 	$(AS) -o $@ cppkeyboard.s
 	@rm cppkeyboard.s
-rs_io.o:rs_io.S
+rs_io.o:rs_io.s
 	$(AS) -o $@ $<
 	

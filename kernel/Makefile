@@ -6,7 +6,7 @@ kernel.o:$(OBJ) asm.o system_call.o
 %.o:%.c
 	$(CC) $(CFLAGS) $(CDIR) -c -o $@ $<
 	
-asm.o:asm.S
+asm.o:asm.s
 	$(AS) -o $@ $<
-system_call.o:system_call.S
+system_call.o:system_call.s
 	$(AS) -o $@ $<

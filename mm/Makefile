@@ -6,5 +6,5 @@ mm.o:$(OBJ) page.o
 %.o:%.c
 	$(CC) $(CFLAGS) $(CDIR) -c -o $@ $<
 	
-page.o:page.S
+page.o:page.s
 	$(AS) -o $@ $<

@@ -8,12 +8,12 @@ CC = gcc
 CPP = $(CC) -E -nostdinc -traditional -I$(ROOT_DIR)/include
 LD = ld
 AR = ar
-AS = as
+AS = as --32
 OBJDUMP = objdump
 OBJCOPY = objcopy
 NM =nm
 
-CFLAGS =-m32 -march=i386 -O1 -Wall -Wstrict-prototypes -fno-strict-aliasing -fomit-frame-pointer -fno-pic -fno-stack-protector -pipe -fno-reorder-functions
+CFLAGS =-m32 -std=gnu89 -march=i386 -O1 -Wall -Wstrict-prototypes -fno-strict-aliasing -fomit-frame-pointer -fno-pic -fno-stack-protector -pipe -fno-reorder-functions
 CDIR = -nostdinc -I$(ROOT_DIR)/include
 CHECKFLAGS = -D__KERNEL__
 LDFLAGS =-m elf_i386 -M -Ttext 0x0
@@ -40,11 +40,11 @@ system.elf:$(OBJ)
 	$(LD) $(LDFLAGS) -o $@ $^ > system.map
 
 boot/bootsect.bin:boot/bootsect.o
-	$(LD) -Ttext 0x0 --oformat binary -o $@ $<
+	$(LD) -m elf_i386 -Ttext 0x0 --oformat binary -o $@ $<
 boot/bootsect.o:boot/bootsect.s
 	$(AS) -o $@ $<
 boot/setup.bin:boot/setup.o
-	$(LD) -Ttext 0x0 --oformat binary -o $@ $<
+	$(LD) -m elf_i386 -Ttext 0x0 --oformat binary -o $@ $<
 boot/setup.o:boot/setup.s
 	$(AS) -o $@ $<
 boot/head.o:boot/head.s
