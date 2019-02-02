@@ -71,8 +71,10 @@ kernel/math/math.a:
 lib/lib.a :
 	$(MAKE) -C $(ROOT_DIR)/lib
 	
-.PHONY: clean
+.PHONY: clean debug_info
 
+debug_info:
+	$(MAKE) 2>"debug_warn.txt"
 clean:
 	@find $(CUR_DIR) -name *.o -exec echo cleaning {} \;
 	@find $(CUR_DIR) -name *.a -exec echo cleaning {} \;
@@ -84,5 +86,6 @@ clean:
 	@rm -rf boot/setup.bin
 	@rm -rf appending.bin
 	@rm -rf Image
+	@rm -rf debug_warn.txt
 	@echo "\ndelete midware file done!\n"
 
