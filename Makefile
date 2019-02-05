@@ -63,6 +63,7 @@ system.syms:system.tmp
 
 system.tmp:system.elf
 	@cp -f system.elf system.tmp
+	@cp -f system.elf tools/system
 
 system.elf: boot/head.o init/main.o \
 	$(ARCHIVES) $(DRIVERS) $(MATH) $(LIBS)
@@ -138,7 +139,7 @@ bochs-clean:
 
 clean:
 	@rm -f Image system.elf system.tmp system.map system.list system.syms tmp_make appending.bin system.bin
-	@rm -f init/*.o tools/build tools/bochsout.txt
+	@rm -f init/*.o tools/build tools/bochsout.txt tools/system
 	@for i in mm fs kernel lib boot;do make clean -C $$i; done
 
 ### Dependencies:
