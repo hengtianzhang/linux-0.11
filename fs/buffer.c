@@ -74,7 +74,7 @@ int sync_dev(int dev)
 
 
 //使制定設備在高速緩衝區中的數據無效
-void inline invalidate_buffers(int dev)
+static void inline invalidate_buffers(int dev)
 {
 	int i;
 	struct buffer_head * bh;

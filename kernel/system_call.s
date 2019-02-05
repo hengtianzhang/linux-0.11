@@ -46,26 +46,26 @@ sa_mask = 4
 sa_flags = 8 #信号集
 sa_restorer = 12 #恢复指针
 
-nr_system_calls = 72 #系统调用总数
+nr_system_calls = 74 #系统调用总数
 
 
 .global system_call, sys_fork, timer_interrupt, sys_execve
 .global hd_interrupt, floppy_interrupt, parallel_interrupt
 .global device_not_available, coprocessor_error
 
-.align 4
+.align 2
 bad_sys_call:
 	movl $-1, %eax
 	iret
 
 /*重新执行调度入口，*/
-.align 4
+.align 2
 reschedule:
 	pushl $ret_from_sys_call
 	jmp schedule
 
 /*int 0x80 eax功能号*/
-.align 4
+.align 2
 system_call:
 	cmpl $nr_system_calls-1, %eax
 	ja bad_sys_call
@@ -159,7 +159,7 @@ coprocessor_error:
  * CR0交换标志TS在CPU执行任务转换时设置。TS可以用来确认是么时候
  * 协处理器中的内容与CPU执行的任务不匹配。
  */
-.align 4
+.align 2
 device_not_available:
 	push %ds
 	push %es
@@ -196,7 +196,7 @@ device_not_available:
 /*jiffies增1 发送结束中断指令给8259控制器，用当前特权级
  *作为参数调用do_timer
  */
-.align 4
+.align 2
 timer_interrupt:
 	push %ds
 	push %es
@@ -224,7 +224,7 @@ timer_interrupt:
 	jmp ret_from_sys_call
 
 	/*sys_execve()系统调用*/
-.align 4
+.align 2
 sys_execve:
 	lea EIP(%esp), %eax
 	pushl %eax
@@ -233,7 +233,7 @@ sys_execve:
 	ret
 
 /*用于创建子进程。*/
-.align 4
+.align 2
 sys_fork:
 	call find_empty_process #取进程号pid
 	testl %eax, %eax #返回负数pid 则任务满

@@ -238,7 +238,7 @@ static void rw_interrupt(void)
 }
 
 //设置DMA通道2并向软盘控制器输出命令和参数
-inline void setup_rw_floppy(void)
+static inline void setup_rw_floppy(void)
 {
 	setup_DMA();
 	do_floppy = rw_interrupt;

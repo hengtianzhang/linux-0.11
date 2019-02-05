@@ -8,10 +8,12 @@
 #include <unistd.h>
 #include <time.h>
 
-inline _syscall0(int,fork)
-inline _syscall0(int,pause)
-inline _syscall1(int,setup,void *,BIOS)
-inline _syscall0(int,sync)
+static inline fork(void) __attribute__((always_inline));
+static inline pause(void) __attribute__((always_inline));
+static inline _syscall0(int,fork)
+static inline _syscall0(int,pause)
+static inline _syscall1(int,setup,void *,BIOS)
+static inline _syscall0(int,sync)
 
 #include <linux/tty.h>
 #include <linux/sched.h>
@@ -121,7 +123,7 @@ int main(void)
  	tty_init();
  	time_init(); //設置開機時間
 	sched_init(); //加載任務0
-	buffer_init(buffer_memory_end);
+    buffer_init(buffer_memory_end);
 	hd_init();
 	floppy_init();
 	sti();
@@ -162,18 +164,38 @@ void init(void)
 	printf("%d buffers = %d bytes buffer space\n\r", NR_BUFFERS,
 			NR_BUFFERS*BLOCK_SIZE);
 	printf("Free mem: %d bytes\n\r", memory_end - main_memory_start);
+    
+    if (!(pid = fork())) {
+        close(0);
+        if (open("/etc/rc", O_RDONLY, 0)) 
+            _exit(1);
+        execve("/bin/sh", argv_rc, envp_rc);
+        _exit(2);
+    }
 
+    if (pid > 0)
+        while (pid != wait(&i))
+            ;
+    while (1) {
+        if (!(pid = fork()) < 0) {
+            printf("Fork failed in init\n\r");
+            continue;
+        }
+        if (!pid) {
+            close(0);close(1); close(2);
+            setsid();
+            (void) open("/dev/tty0", O_RDWR, 0);
+            (void) dup(0);
+            (void) dup(0);
+            _exit(execve("/bin/sh", argv, envp));
+        }
+        while (1)
+            if (pid == wait(&i))
+                break;
+        printf("\n\rchild %d died with code %04x\n\r", pid, i);
+        sync();
+    }
+    _exit(0);
 }
-
-
-
-
-
-
-
-
-
-
-
 
 

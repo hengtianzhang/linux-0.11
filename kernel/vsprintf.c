@@ -164,7 +164,6 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 		case 's':
 			s = va_arg(args, char *);
 			len = strlen(s);
-			s -= (len + 1); /* using strlen causes the 's' pointer to change  :-( I don't know! */
 			if (precision < 0)
 				precision = len;
 			else if (len > precision)

@@ -1,4 +1,10 @@
 /*
+ *  linux/fs/exec.c
+ *
+ *  (C) 1991  Linus Torvalds
+ */
+
+/*
  * #!-checking implemented by tytso.
  */
 
@@ -36,62 +42,71 @@ extern int sys_close(int fd);
  * create_tables() parses the env- and arg-strings in new user
  * memory and creates the pointer tables from them, and puts their
  * addresses on the "stack", returning the new stack pointer value.
- * 
- * 在新任务内存中解析环境变量和参数字符串
  */
 static unsigned long * create_tables(char * p,int argc,int envc)
 {
 	unsigned long *argv,*envp;
 	unsigned long * sp;
-	sp = (unsigned long *) (0xfffffffc & (unsigned long) p);
-	sp -= envc + 1;
-	envp = sp;
-	sp -= argc + 1;
-	argv = sp;
-	put_fs_long((unsigned long)envp, --sp);
-	put_fs_long((unsigned long)argv, --sp);	
-	put_fs_long((unsigned long)argc, --sp);
 
-	while (argc-- > 0) {
-		put_fs_long((unsigned long) p, argv++);
-		while (get_fs_byte(p++));
+	sp = (unsigned long *) (0xfffffffc & (unsigned long) p);
+	sp -= envc+1;
+	envp = sp;
+	sp -= argc+1;
+	argv = sp;
+	put_fs_long((unsigned long)envp,--sp);
+	put_fs_long((unsigned long)argv,--sp);
+	put_fs_long((unsigned long)argc,--sp);
+	while (argc-->0) {
+		put_fs_long((unsigned long) p,argv++);
+		while (get_fs_byte(p++)) /* nothing */ ;
 	}
-	put_fs_long(0, argv);
-	while (envc-- > 0) {
-		put_fs_long((unsigned long) p, envp++);
-		while (get_fs_byte(p++));
+	put_fs_long(0,argv);
+	while (envc-->0) {
+		put_fs_long((unsigned long) p,envp++);
+		while (get_fs_byte(p++)) /* nothing */ ;
 	}
-	put_fs_long(0, envp);
+	put_fs_long(0,envp);
 	return sp;
 }
 
-/* 计算命令行参数/环境变量个数 */
+/*
+ * count() counts the number of arguments/envelopes
+ */
 static int count(char ** argv)
 {
-	int i = 0;
+	int i=0;
 	char ** tmp;
 
-	if (tmp = argv)
+	if ((tmp = argv))
 		while (get_fs_long((unsigned long *) (tmp++)))
 			i++;
+
 	return i;
 }
 
 /*
- * 从用户内存空间拷贝参数/环境变量字符串到内核空闲页面
- * from_kmem  指针 argv *  字符串 argv **
- *  0         用户空间      用户空间
- *  1         内核空间      用户空间
- *  2         内核空间      内核空间 
+ * 'copy_string()' copies argument/envelope strings from user
+ * memory to free pages in kernel mem. These are in a format ready
+ * to be put directly into the top of new user memory.
+ *
+ * Modified by TYT, 11/24/91 to add the from_kmem argument, which specifies
+ * whether the string and the string array are from user or kernel segments:
+ * 
+ * from_kmem     argv *        argv **
+ *    0          user space    user space
+ *    1          kernel space  user space
+ *    2          kernel space  kernel space
+ * 
+ * We do this by playing games with the fs segment register.  Since it
+ * it is expensive to load a segment register, we try to avoid calling
+ * set_fs() unless we absolutely have to.
  */
-static unsigned long copy_strings(int argc, char ** argv, unsigned long * page,
-										unsigned long p, int from_kmem)
+static unsigned long copy_strings(int argc,char ** argv,unsigned long *page,
+		unsigned long p, int from_kmem)
 {
-	
-	char *tmp, *pag;
+	char *tmp, *pag=NULL;
 	int len, offset = 0;
 	unsigned long old_fs, new_fs;
-
 	if (!p)
 		return 0;	/* bullet-proofing */
 	new_fs = get_ds();
@@ -119,12 +134,10 @@ static unsigned long copy_strings(int argc, char ** argv, unsigned long * page,
 				offset = p % PAGE_SIZE;
 				if (from_kmem==2)
 					set_fs(old_fs);
-				if ((!page[p/PAGE_SIZE]) &&
-					!(page[p/PAGE_SIZE] = 
-						(unsigned long *) get_free_page()))
+				if (!(pag = (char *) page[p/PAGE_SIZE]) &&
+				    !(pag = (char *) (page[p/PAGE_SIZE] =
+				      get_free_page()))) 
 					return 0;
-				else
-					pag = (char *) page[p/PAGE_SIZE];
 				if (from_kmem==2)
 					set_fs(new_fs);
 
@@ -136,7 +149,6 @@ static unsigned long copy_strings(int argc, char ** argv, unsigned long * page,
 		set_fs(old_fs);
 	return p;
 }
-
 
 static unsigned long change_ldt(unsigned long text_size,unsigned long * page)
 {
@@ -163,9 +175,6 @@ static unsigned long change_ldt(unsigned long text_size,unsigned long * page)
 	return data_limit;
 }
 
-
-
-
 /*
  * 'do_execve()' executes a new program.
  */
@@ -181,7 +190,6 @@ int do_execve(unsigned long * eip,long tmp,char * filename,
 	int retval;
 	int sh_bang = 0;
 	unsigned long p=PAGE_SIZE*MAX_ARG_PAGES-4;
-
 	if ((0xffff & eip[1]) != 0x000f)
 		panic("execve called from supervisor mode");
 	for (i=0 ; i<MAX_ARG_PAGES ; i++)	/* clear page-table */
@@ -190,7 +198,6 @@ int do_execve(unsigned long * eip,long tmp,char * filename,
 		return -ENOENT;
 	argc = count(argv);
 	envc = count(envp);
-	
 restart_interp:
 	if (!S_ISREG(inode->i_mode)) {	/* must be regular file */
 		retval = -EACCES;
@@ -226,7 +233,7 @@ restart_interp:
 		brelse(bh);
 		iput(inode);
 		buf[1022] = '\0';
-		if (cp = strchr(buf, '\n')) {
+		if ((cp = strchr(buf, '\n'))) {
 			*cp = '\0';
 			for (cp = buf; (*cp == ' ') || (*cp == '\t'); cp++);
 		}
@@ -341,6 +348,3 @@ exec_error1:
 		free_page(page[i]);
 	return(retval);
 }
-
-
-

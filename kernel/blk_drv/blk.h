@@ -78,15 +78,14 @@ extern struct task_struct * wait_for_request;
 #define DEVICE_NR(device) (MINOR(device)/5) //0-1
 #define DEVICE_ON(device)
 #define DEVICE_OFF(device)
-/*
-#elif
-/* unknown blk device 
+
+#else
+/* unknown blk device */
 #error "unknown blk device"
-*/
+
 #endif
 
 
-/**/
 #define CURRENT (blk_dev[MAJOR_NR].current_request) //指定主设备号的当前指针
 #define CURRENT_DEV DEVICE_NR(CURRENT->dev) //当前请求项CURRENT中的设备号
 
@@ -101,7 +100,7 @@ static void (DEVICE_REQUEST)(void);
 /*锁定指定的缓冲区 块*/
 //如果指定的缓冲区bh未加锁，则报警告信息。否则解锁并唤醒等待
 //该缓冲区的进程。参数缓冲区头指针
-extern inline void unlock_buffer(struct buffer_head * bh)
+static inline void unlock_buffer(struct buffer_head * bh)
 {
 	if (!bh->b_lock)
 		printk(DEVICE_NAME ": free buffer being unlocked\n");
@@ -114,7 +113,7 @@ extern inline void unlock_buffer(struct buffer_head * bh)
 //更新标志 并解锁该缓冲区。唤醒等待该请求项的进程以及等待空闲
 //请求项出现的进程。释放并从请求项链表中删除本请求项，并指向
 //下一请求
-extern inline void end_request(int uptodate)
+static inline void end_request(int uptodate)
 {
 	DEVICE_OFF(CURRENT->dev); //关闭设备
 	if (CURRENT->bh) { //CURRENT为当前请求项指针

@@ -336,7 +336,7 @@ int sys_alarm(long seconds)
 }
 
 //取当前进程号pid
-int sys_getepid(void)
+int sys_getpid(void)
 {
 	return current->pid;
 }

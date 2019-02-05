@@ -1,7 +1,6 @@
 ################################################
 #configure file for Bochs
 ################################################
-
 # how much memory the emulated machine will have
 megs: 16
 

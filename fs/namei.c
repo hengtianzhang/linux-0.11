@@ -52,7 +52,7 @@ static int match(int len, const char * name, struct dir_entry * de)
 		"setz %%al"
 		:"=a" (same)
 		:"0" (0),"S" ((long) name),"D" ((long) de->name),"c" (len)
-		:);
+		);
 	return same;	
 }
 
@@ -100,7 +100,6 @@ static struct buffer_head * find_entry(struct m_inode ** dir,
 		return NULL;
 	i = 0;
 	de = (struct dir_entry *) bh->b_data;
-	name += 1;
 	while (i < entries) {
 		if ((char *)de >= BLOCK_SIZE+bh->b_data) {
 			brelse(bh);
@@ -116,7 +115,6 @@ static struct buffer_head * find_entry(struct m_inode ** dir,
 			*res_dir = de;			
 			return bh;
 		}
-		name -= 1;
 		de++;
 		i++;
 	}
@@ -213,7 +211,7 @@ static struct m_inode * get_dir(const char * pathname)
 		}
 		for(namelen=0;(c=get_fs_byte(pathname++))&&(c!='/');namelen++)
 			/* nothing */ ;
-		if (!c)
+		if (!c) 
 			return inode;
 		if (!(bh = find_entry(&inode,thisname,namelen,&de))) {
 			iput(inode);

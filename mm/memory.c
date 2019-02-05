@@ -95,7 +95,6 @@ int free_page_tables(unsigned long from, unsigned long size)
 {
 	unsigned long *pg_table;
 	unsigned long * dir, nr;
-
 	if (from & 0x3fffff)/*检测地址是否在4MB边界*/
 		panic("free_page_tables called with wrong alignment");
 	if (!from)/*from = 0表示释放内核和缓冲区*/
@@ -402,33 +401,6 @@ void calc_mem(void)
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
