@@ -19,8 +19,8 @@ CPP	+= -I../include
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-OBJS  = _exit.o close.o ctype.o dup.o errno.o execve.o open.o \
-		setsid.o string.o wait.o write.o
+OBJS  = _exit.o close.o ctype.o dup.o errno.o execve.o malloc.o \
+		open.o setsid.o string.o wait.o write.o
 
 lib.a: $(OBJS)
 	$(AR) rcs $@ $(OBJS)
