@@ -20,7 +20,7 @@ linux-0.11 development environment(linux-based)
 * a virtual machine: qemu(recommend) or bochs 
 * some tools: cscope, ctags, gcc-4.3(or later), vim, bash, gdb, dd, qemu, xorg-dev, xserver-xorg-dev...
   $ apt-get install qemu cscope exuberant-ctags gcc-4.3 vim-full bash gdb build-essential hex graphviz xorg-dev xserver-xorg-dev vgabios libxpm-dev bochs bochs-x bochsbios bximage
-* a linux-0.11 hardware image file: hdc-0.11-new.img, please download it from http://www.oldlinux.org, or http://mirror.lzu.edu.cn/os/oldlinux.org/, after downloading it, or cd tools;tar -xvf hdc-0.11-new.img.
+* a linux-0.11 hardware image file: hdc-0.11-new.img, please download it from http://www.oldlinux.org, after downloading it, or cd tools;tar -xvf hdc-0.11-new.img.
 
 and you'd better install tools/calltree, tools/tree2dotx yourself: just copy
 them to /usr/bin, of course, you'd compile calltree at first.
