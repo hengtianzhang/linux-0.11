@@ -15,16 +15,20 @@ int sync_dev(int dev);
 void wait_for_keypress(void);
 
 /* set_bit uses setb, as gas doesn't recognize setc */
-#define set_bit(bitnr,addr) ({ \
-register int __res; \
-__asm__("bt %2,%3;setb %%al":"=a" (__res):"a" (0),"r" (bitnr),"m" (*(addr))); \
-__res; })
+#define set_bit(bitnr, addr)                                                   \
+	({                                                                     \
+		register int __res;                                            \
+		__asm__("bt %2,%3;setb %%al"                                   \
+			: "=a"(__res)                                          \
+			: "a"(0), "r"(bitnr), "m"(*(addr)));                   \
+		__res;                                                         \
+	})
 
 struct super_block super_block[NR_SUPER];
 
 int ROOT_DEV = 0;
 
-static void lock_super(struct super_block * sb)
+static void lock_super(struct super_block *sb)
 {
 	cli();
 	while (sb->s_lock)
@@ -33,7 +37,7 @@ static void lock_super(struct super_block * sb)
 	sti();
 }
 
-static void free_super(struct super_block * sb)
+static void free_super(struct super_block *sb)
 {
 	cli();
 	sb->s_lock = 0;
@@ -41,8 +45,7 @@ static void free_super(struct super_block * sb)
 	sti();
 }
 
-
-static void wait_on_super(struct super_block * sb)
+static void wait_on_super(struct super_block *sb)
 {
 	cli();
 	while (sb->s_lock)
@@ -51,9 +54,9 @@ static void wait_on_super(struct super_block * sb)
 }
 
 //取指定设备的超级块
-struct super_block * get_super(int dev)
+struct super_block *get_super(int dev)
 {
-	struct super_block * s;
+	struct super_block *s;
 	if (!dev)
 		return NULL;
 	s = 0 + super_block;
@@ -70,18 +73,18 @@ struct super_block * get_super(int dev)
 
 void put_super(int dev)
 {
-	struct super_block * sb;
+	struct super_block *sb;
 	int i;
 
 	if (dev == ROOT_DEV) {
 		printk("root diskette changed: perpare for armageddon\n\r");
-		return ;
+		return;
 	}
 	if (!(sb = get_super(dev)))
-		return ;
+		return;
 	if (sb->s_imount) {
 		printk("Mounted disk changed - tssk, tssk\n\r");
-		return ;
+		return;
 	}
 
 	lock_super(sb);
@@ -91,16 +94,14 @@ void put_super(int dev)
 	for (i = 0; i < Z_MAP_SLOTS; i++)
 		brelse(sb->s_zmap[i]);
 	free_super(sb);
-	return ;
+	return;
 }
 
-
-
 /* 读指定设备的超级块 */
-static struct super_block * read_super(int dev)
+static struct super_block *read_super(int dev)
 {
-	struct super_block * s;
-	struct buffer_head * bh;
+	struct super_block *s;
+	struct buffer_head *bh;
 	int i, block;
 
 	if (!dev)
@@ -109,7 +110,7 @@ static struct super_block * read_super(int dev)
 
 	if ((s = get_super(dev)))
 		return s;
-	for (s = 0 + super_block; ; s++) {
+	for (s = 0 + super_block;; s++) {
 		if (s >= NR_SUPER + super_block)
 			return NULL;
 		if (!s->s_dev)
@@ -128,8 +129,7 @@ static struct super_block * read_super(int dev)
 		free_super(s);
 		return NULL;
 	}
-	*((struct d_super_block *)s) =
-			*((struct d_super_block *) bh->b_data);
+	*((struct d_super_block *)s) = *((struct d_super_block *)bh->b_data);
 	brelse(bh);
 	if (s->s_magic != SUPER_MAGIC) {
 		s->s_dev = 0;
@@ -140,14 +140,14 @@ static struct super_block * read_super(int dev)
 	for (i = 0; i < I_MAP_SLOTS; i++)
 		s->s_imap[i] = NULL;
 	for (i = 0; i < Z_MAP_SLOTS; i++)
-		s->s_zmap[i]= NULL;
+		s->s_zmap[i] = NULL;
 	block = 2;
-	for (i = 0; i < s->s_imap_blocks ; i++)
+	for (i = 0; i < s->s_imap_blocks; i++)
 		if ((s->s_imap[i] = bread(dev, block)))
 			block++;
 		else
 			break;
-	for (i = 0; i < s->s_zmap_blocks ; i++)
+	for (i = 0; i < s->s_zmap_blocks; i++)
 		if ((s->s_zmap[i] = bread(dev, block)))
 			block++;
 		else
@@ -167,10 +167,10 @@ static struct super_block * read_super(int dev)
 	return s;
 }
 
-int sys_umount(char * dev_name)
+int sys_umount(char *dev_name)
 {
-	struct m_inode * inode;
-	struct super_block * sb;
+	struct m_inode *inode;
+	struct super_block *sb;
 	int dev;
 
 	if (!(inode = namei(dev_name)))
@@ -201,13 +201,13 @@ int sys_umount(char * dev_name)
 	return 0;
 }
 
-int sys_mount(char * dev_name, char * dir_name, int rw_flag)
+int sys_mount(char *dev_name, char *dir_name, int rw_flag)
 {
-	struct m_inode * dev_i, * dir_i;
-	struct super_block * sb;
+	struct m_inode *dev_i, *dir_i;
+	struct super_block *sb;
 	int dev;
 
-	if (!(dev_i=namei(dev_name)))
+	if (!(dev_i = namei(dev_name)))
 		return -ENOENT;
 	dev = dev_i->i_zone[0];
 	if (!S_ISBLK(dev_i->i_mode)) {
@@ -215,7 +215,7 @@ int sys_mount(char * dev_name, char * dir_name, int rw_flag)
 		return -EPERM;
 	}
 	iput(dev_i);
-	if (!(dir_i=namei(dir_name)))
+	if (!(dir_i = namei(dir_name)))
 		return -ENOENT;
 	if (dir_i->i_count != 1 || dir_i->i_num == ROOT_INO) {
 		iput(dir_i);
@@ -225,7 +225,7 @@ int sys_mount(char * dev_name, char * dir_name, int rw_flag)
 		iput(dir_i);
 		return -EPERM;
 	}
-	if (!(sb=read_super(dev))) {
+	if (!(sb = read_super(dev))) {
 		iput(dir_i);
 		return -EBUSY;
 	}
@@ -237,51 +237,49 @@ int sys_mount(char * dev_name, char * dir_name, int rw_flag)
 		iput(dir_i);
 		return -EPERM;
 	}
-	sb->s_imount=dir_i;
-	dir_i->i_mount=1;
-	dir_i->i_dirt=1;		/* NOTE! we don't iput(dir_i) */
-	return 0;			/* we do that in umount */
+	sb->s_imount = dir_i;
+	dir_i->i_mount = 1;
+	dir_i->i_dirt = 1; /* NOTE! we don't iput(dir_i) */
+	return 0; /* we do that in umount */
 }
-
 
 void mount_root(void)
 {
-	int i,free;
-	struct super_block * p;
-	struct m_inode * mi;
+	int i, free;
+	struct super_block *p;
+	struct m_inode *mi;
 
-	if (32 != sizeof (struct d_inode))
+	if (32 != sizeof(struct d_inode))
 		panic("bad i-node size");
-	for(i=0;i<NR_FILE;i++)
-		file_table[i].f_count=0;
+	for (i = 0; i < NR_FILE; i++)
+		file_table[i].f_count = 0;
 	if (MAJOR(ROOT_DEV) == 2) {
 		printk("Insert root floppy and press ENTER");
 		wait_for_keypress();
 	}
-	for(p = &super_block[0] ; p < &super_block[NR_SUPER] ; p++) {
+	for (p = &super_block[0]; p < &super_block[NR_SUPER]; p++) {
 		p->s_dev = 0;
 		p->s_lock = 0;
 		p->s_wait = NULL;
 	}
-	if (!(p=read_super(ROOT_DEV)))
+	if (!(p = read_super(ROOT_DEV)))
 		panic("Unable to mount root");
-	if (!(mi=iget(ROOT_DEV,ROOT_INO)))
+	if (!(mi = iget(ROOT_DEV, ROOT_INO)))
 		panic("Unable to read root i-node");
-	mi->i_count += 3 ;	/* NOTE! it is logically used 4 times, not 1 */
+	mi->i_count += 3; /* NOTE! it is logically used 4 times, not 1 */
 	p->s_isup = p->s_imount = mi;
 	current->pwd = mi;
 	current->root = mi;
-	free=0;
-	i=p->s_nzones;
-	while (-- i >= 0)
-		if (!set_bit(i&8191,p->s_zmap[i>>13]->b_data))
+	free = 0;
+	i = p->s_nzones;
+	while (--i >= 0)
+		if (!set_bit(i & 8191, p->s_zmap[i >> 13]->b_data))
 			free++;
-	printk("%d/%d free blocks\n\r",free,p->s_nzones);
-	free=0;
-	i=p->s_ninodes+1;
-	while (-- i >= 0)
-		if (!set_bit(i&8191,p->s_imap[i>>13]->b_data))
+	printk("%d/%d free blocks\n\r", free, p->s_nzones);
+	free = 0;
+	i = p->s_ninodes + 1;
+	while (--i >= 0)
+		if (!set_bit(i & 8191, p->s_imap[i >> 13]->b_data))
 			free++;
-	printk("%d/%d free inodes\n\r",free,p->s_ninodes);
+	printk("%d/%d free inodes\n\r", free, p->s_ninodes);
 }
-

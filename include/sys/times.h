@@ -13,7 +13,6 @@ struct tms {
 	time_t tms_cstime; //已终止的子进程使用的系统CPU时间
 };
 
-extern time_t times(struct tms * tp);
+extern time_t times(struct tms *tp);
 
 #endif
- 

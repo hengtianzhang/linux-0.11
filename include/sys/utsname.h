@@ -14,6 +14,6 @@ struct utsname {
 	char machine[9]; //系统运行的硬件类型名称
 };
 
-extern int uname(struct utsname * utsbuf);
+extern int uname(struct utsname *utsbuf);
 
 #endif

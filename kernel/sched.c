@@ -9,20 +9,21 @@
 #include <signal.h>
 
 //取信號二進制數值 ex： 信號5   1<<(5-1) = 16 = 00010000b
-#define _S(nr) (1<<(nr-1))
+#define _S(nr) (1 << (nr - 1))
 
 //除SIGKILL SIGSTOP都可以阻塞
 #define _BLOCKABLE (~(_S(SIGKILL) | _S(SIGSTOP)))
 
 //内核調試函數。顯示任務號nr的進程號，進程狀態和内核堆棧空閑字節數
-void show_task(int nr, struct task_struct * p)
+void show_task(int nr, struct task_struct *p)
 {
-	int i, j = 4096-sizeof(struct task_struct);
-	printk("%d: pid=%d, state=%d, ",nr, p->pid, p->state);
+	int i, j = 4096 - sizeof(struct task_struct);
+	printk("%d: pid=%d, state=%d, ", nr, p->pid, p->state);
 	i = 0;
-	while (i < j && !((char *)(p+1))[i]) //檢測指定任務數據結構以後等於0的字節數
+	while (i < j &&
+	       !((char *)(p + 1))[i]) //檢測指定任務數據結構以後等於0的字節數
 		i++;
-	printk("%d (of %d) chars free in kernel stack\n\r",i, j);
+	printk("%d (of %d) chars free in kernel stack\n\r", i, j);
 }
 
 //顯示所有任務的任務號，進程號，進程狀態和内核堆棧空閑字節數
@@ -35,7 +36,7 @@ void show_stat(void)
 }
 
 //PC機8253定時芯片的輸入時鐘頻率約爲1.193180MHZ.set成100HZ
-#define LATCH (1193180/HZ)
+#define LATCH (1193180 / HZ)
 
 extern void mem_use(void);
 
@@ -48,24 +49,28 @@ union task_union {
 	char stack[PAGE_SIZE]; //在同一頁，故從堆棧段寄存器ss可獲取其數據段選擇符
 };
 
-static union task_union init_task = {INIT_TASK,};//定義初始任務數據
+static union task_union init_task = {
+	INIT_TASK,
+}; //定義初始任務數據
 
 long volatile jiffies = 0;
 long startup_time = 0;
 
-struct task_struct *current = &(init_task.task); 
+struct task_struct *current = &(init_task.task);
 struct task_struct *last_task_used_math = NULL; //使用過協處理器的任務指針
 
-struct task_struct *task[NR_TASKS] = {&(init_task.task), };
+struct task_struct *task[NR_TASKS] = {
+	&(init_task.task),
+};
 
 //定義用戶堆棧 1K項 容量4K字節  内核初始化用於内核棧
 //初始化完成用於任務0，1用戶態堆棧
-long user_stack [ PAGE_SIZE>>2 ];
+long user_stack[PAGE_SIZE >> 2];
 
 struct {
-	long * a;
+	long *a;
 	short b;
-} stack_start = { & user_stack [PAGE_SIZE>>2], 0x10 };
+} stack_start = { &user_stack[PAGE_SIZE >> 2], 0x10 };
 
 /*將當前協處理器内容保存至老協處理器狀態數組中。并將當前任務的協處理器
 	内容加載到協處理器
@@ -73,16 +78,16 @@ struct {
 void math_state_restore()
 {
 	if (last_task_used_math == current)
-		return ;
+		return;
 	__asm__("fwait");
 	if (last_task_used_math) {
-		__asm__("fnsave %0"::"m" (last_task_used_math->tss.i387));
+		__asm__("fnsave %0" ::"m"(last_task_used_math->tss.i387));
 	}
 	last_task_used_math = current;
 	if (current->used_math) {
-		__asm__("frstor %0"::"m" (current->tss.i387));
+		__asm__("frstor %0" ::"m"(current->tss.i387));
 	} else {
-		__asm__("fninit"::);
+		__asm__("fninit" ::);
 		current->used_math = 1;
 	}
 }
@@ -92,15 +97,15 @@ void schedule(void)
 {
 	int i, next, c;
 	struct task_struct **p;
-//檢測alarm，喚醒任何已得到信號的可中斷任務
-	for (p = &LAST_TASK; p > &FIRST_TASK ; --p)
+	//檢測alarm，喚醒任何已得到信號的可中斷任務
+	for (p = &LAST_TASK; p > &FIRST_TASK; --p)
 		if (*p) {
 			if ((*p)->alarm && (*p)->alarm < jiffies) {
-				(*p)->signal |= (1<<(SIGALRM-1));
+				(*p)->signal |= (1 << (SIGALRM - 1));
 				(*p)->alarm = 0;
 			}
 			if (((*p)->signal & ~(_BLOCKABLE & (*p)->blocked)) &&
-					(*p)->state == TASK_INTERRUPTIBLE)
+			    (*p)->state == TASK_INTERRUPTIBLE)
 				(*p)->state = TASK_RUNNING;
 		}
 	while (1) {
@@ -114,15 +119,15 @@ void schedule(void)
 			if ((*p)->state == TASK_RUNNING && (*p)->counter > c)
 				c = (*p)->counter, next = i;
 		}
-		if (c) break;
+		if (c)
+			break;
 		for (p = &LAST_TASK; p > &FIRST_TASK; --p)
 			if (*p)
-				(*p)->counter = ((*p)->counter >> 1) +
-									(*p)->priority;
+				(*p)->counter =
+					((*p)->counter >> 1) + (*p)->priority;
 	}
 	switch_to(next);
 }
-
 
 //轉換當前任務的狀態爲可中斷的等待狀態，並重新調度
 //未完全實現
@@ -139,7 +144,7 @@ void sleep_on(struct task_struct **p)
 {
 	struct task_struct *tmp;
 	if (!p)
-		return ;
+		return;
 	if (current == &(init_task.task))
 		panic("task[0] trying to sleep");
 	tmp = *p;
@@ -155,11 +160,11 @@ void interruptible_sleep_on(struct task_struct **p)
 {
 	struct task_struct *tmp;
 	if (!p)
-		return ;
+		return;
 	if (current == &(init_task.task))
 		panic("task[0] trying to sleep");
 	tmp = *p;
-	*p  = current;
+	*p = current;
 repeat:
 	current->state = TASK_INTERRUPTIBLE;
 	schedule();
@@ -172,7 +177,6 @@ repeat:
 		tmp->state = 0;
 }
 
-
 void wake_up(struct task_struct **p)
 {
 	if (p && *p) {
@@ -181,20 +185,19 @@ void wake_up(struct task_struct **p)
 	}
 }
 
-
 /*floppy intr*/
 //等待馬達正常啓動進程指針。0-3對應軟驅A-D
-static struct task_struct * wait_motor[4] = {NULL,NULL,NULL,NULL};
+static struct task_struct *wait_motor[4] = { NULL, NULL, NULL, NULL };
 //存放各軟驅馬達所需要滴答數
-static int mon_timer[4] = {0,0,0,0};
+static int mon_timer[4] = { 0, 0, 0, 0 };
 //馬達停轉之前需維持時間
-static int moff_timer[4] = {0,0,0,0};
+static int moff_timer[4] = { 0, 0, 0, 0 };
 
 //對應軟驅控制器當前輸出寄存器 7-4未使用
 //位3 1允許DMA中斷 0-禁止DMA中斷請求
 //2   1 啓動軟盤控制器  ，0復位軟盤控制器
 //1-0 00-11 選擇控制器A-D
-unsigned char current_DOR = 0x0C;//允許DMA和中斷請求啓動FDC
+unsigned char current_DOR = 0x0C; //允許DMA和中斷請求啓動FDC
 int ticks_to_floppy_on(unsigned int nr)
 {
 	extern unsigned char selected;
@@ -209,9 +212,9 @@ int ticks_to_floppy_on(unsigned int nr)
 		mask |= nr;
 	}
 	if (mask != current_DOR) {
-		outb(mask,FD_DOR);
+		outb(mask, FD_DOR);
 		if ((mask ^ current_DOR) & 0xf0)
-			mon_timer[nr] = HZ/2;
+			mon_timer[nr] = HZ / 2;
 		else if (mon_timer[nr] < 2)
 			mon_timer[nr] = 2;
 		current_DOR = mask;
@@ -224,13 +227,13 @@ void floppy_on(unsigned int nr)
 {
 	cli();
 	while (ticks_to_floppy_on(nr))
-		sleep_on(nr+wait_motor);
+		sleep_on(nr + wait_motor);
 	sti();
 }
 
 void floppy_off(unsigned int nr)
 {
-	moff_timer[nr] = 3*HZ;
+	moff_timer[nr] = 3 * HZ;
 }
 
 void do_floppy_timer(void)
@@ -238,15 +241,15 @@ void do_floppy_timer(void)
 	int i;
 	unsigned char mask = 0x10;
 
-	for (i=0 ; i<4 ; i++,mask <<= 1) {
+	for (i = 0; i < 4; i++, mask <<= 1) {
 		if (!(mask & current_DOR))
 			continue;
 		if (mon_timer[i]) {
 			if (!--mon_timer[i])
-				wake_up(i+wait_motor);
+				wake_up(i + wait_motor);
 		} else if (!moff_timer[i]) {
 			current_DOR &= ~mask;
-			outb(current_DOR,FD_DOR);
+			outb(current_DOR, FD_DOR);
 		} else
 			moff_timer[i]--;
 	}
@@ -257,19 +260,19 @@ void do_floppy_timer(void)
 static struct timer_list {
 	long jiffies;
 	void (*fn)();
-	struct timer_list * next;
+	struct timer_list *next;
 } timer_list[TIME_REQUEST], *next_timer = NULL;
 
 void add_timer(long jiffies, void (*fn)(void))
 {
-	struct timer_list * p;
+	struct timer_list *p;
 	if (!fn)
 		return;
 	cli();
 	if (jiffies <= 0)
 		(fn)();
 	else {
-		for (p = timer_list ; p < timer_list + TIME_REQUEST; p++)
+		for (p = timer_list; p < timer_list + TIME_REQUEST; p++)
 			if (!p->fn)
 				break;
 		if (p >= timer_list + TIME_REQUEST)
@@ -291,7 +294,6 @@ void add_timer(long jiffies, void (*fn)(void))
 	sti();
 }
 
-
 /*任务切换*/
 void do_timer(long cpl)
 {
@@ -302,9 +304,9 @@ void do_timer(long cpl)
 			sysbeepstop();
 	if (cpl)
 		current->utime++;
-	else 
+	else
 		current->stime++;
-//存在定时器，则将链表第一个定时器减1，为0则调用处理程序，去掉该定时器
+	//存在定时器，则将链表第一个定时器减1，为0则调用处理程序，去掉该定时器
 	if (next_timer) {
 		next_timer->jiffies--;
 		while (next_timer && next_timer->jiffies <= 0) {
@@ -318,12 +320,13 @@ void do_timer(long cpl)
 	if (current_DOR & 0xf0)
 		do_floppy_timer();
 	//如果进程运行时间还没完，则推出。否则置当前任务运行计数值0
-	if ((--current->counter) > 0) return;
+	if ((--current->counter) > 0)
+		return;
 	current->counter = 0;
-	if (!cpl) return; //内核态程序不依赖counter值进行调度
+	if (!cpl)
+		return; //内核态程序不依赖counter值进行调度
 	schedule();
 }
-
 
 //系统调用功能，设置报警定时时间值(秒)
 int sys_alarm(long seconds)
@@ -331,7 +334,7 @@ int sys_alarm(long seconds)
 	int old = current->alarm;
 	if (old)
 		old = (old - jiffies) / HZ;
-	current->alarm = (seconds>0)?(jiffies+HZ*seconds):0;
+	current->alarm = (seconds > 0) ? (jiffies + HZ * seconds) : 0;
 	return (old);
 }
 
@@ -379,17 +382,16 @@ int sys_nice(long increment)
 	return 0;
 }
 
-
 void sched_init(void)
 {
 	int i;
-	struct desc_struct * p;
+	struct desc_struct *p;
 	if (sizeof(struct sigaction) != 16)
 		panic("Struct sigaction MUST be 16 bytes");
-	set_tss_desc(gdt+FIRST_TSS_ENTRY, & (init_task.task.tss));
-	set_ldt_desc(gdt+FIRST_LDT_ENTRY, & (init_task.task.ldt));
+	set_tss_desc(gdt + FIRST_TSS_ENTRY, &(init_task.task.tss));
+	set_ldt_desc(gdt + FIRST_LDT_ENTRY, &(init_task.task.ldt));
 	//清任务数组和描述符表项
-	p = gdt+2+FIRST_TSS_ENTRY;
+	p = gdt + 2 + FIRST_TSS_ENTRY;
 	for (i = 1; i < NR_TASKS; i++) {
 		task[i] = NULL;
 		p->a = p->b = 0;
@@ -405,57 +407,13 @@ void sched_init(void)
 	lldt(0);
 
 	//初始化8253定时器 通道0.工作方式3 二进制计数 IRQ0。10ms LATCH是初始值
-	outb_p(0x36,0x43);
+	outb_p(0x36, 0x43);
 	outb_p(LATCH & 0xff, 0x40);
 	outb(LATCH >> 8, 0x40);
 
 	//设置时钟中断处理句柄，时钟中断门，修改中断控制器屏蔽码。允许时钟中断
 	//设置系统调用中断门
-	set_intr_gate(0x20,&timer_interrupt);
-	outb(inb_p(0x21)&~0x01,0x21);
-	set_system_gate(0x80,&system_call);
-	
+	set_intr_gate(0x20, &timer_interrupt);
+	outb(inb_p(0x21) & ~0x01, 0x21);
+	set_system_gate(0x80, &system_call);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

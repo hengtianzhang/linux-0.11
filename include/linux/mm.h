@@ -13,4 +13,3 @@ extern unsigned long put_page(unsigned long page, unsigned long address);
 /*释放物理地址addr开始的一页内存。*/
 extern void free_page(unsigned long addr);
 #endif
-

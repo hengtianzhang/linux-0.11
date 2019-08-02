@@ -13,21 +13,27 @@ struct tty_queue {
 	unsigned long data;
 	unsigned long head;
 	unsigned long tail;
-	struct task_struct * proc_list; //等待进程列表
+	struct task_struct *proc_list; //等待进程列表
 	char buf[TTY_BUF_SIZE]; //队列缓冲区
 };
 
-#define INC(a) ((a) = ((a)+1) & (TTY_BUF_SIZE-1))
-#define DEC(a) ((a) = ((a)-1) & (TTY_BUF_SIZE-1))
+#define INC(a) ((a) = ((a) + 1) & (TTY_BUF_SIZE - 1))
+#define DEC(a) ((a) = ((a)-1) & (TTY_BUF_SIZE - 1))
 #define EMPTY(a) ((a).head == (a).tail)
-#define LEFT(a) (((a).tail-(a).head-1)&(TTY_BUF_SIZE-1))
-#define LAST(a) ((a).buf[(TTY_BUF_SIZE-1)&((a).head-1)])
+#define LEFT(a) (((a).tail - (a).head - 1) & (TTY_BUF_SIZE - 1))
+#define LAST(a) ((a).buf[(TTY_BUF_SIZE - 1) & ((a).head - 1)])
 #define FULL(a) (!LEFT(a))
-#define CHARS(a) (((a).head-(a).tail)&(TTY_BUF_SIZE-1))
-#define GETCH(queue,c) \
-(void)({c=(queue).buf[(queue).tail];INC((queue).tail);})
-#define PUTCH(c,queue) \
-(void)({(queue).buf[(queue).head]=(c);INC((queue).head);})
+#define CHARS(a) (((a).head - (a).tail) & (TTY_BUF_SIZE - 1))
+#define GETCH(queue, c)                                                        \
+	(void)({                                                               \
+		c = (queue).buf[(queue).tail];                                 \
+		INC((queue).tail);                                             \
+	})
+#define PUTCH(c, queue)                                                        \
+	(void)({                                                               \
+		(queue).buf[(queue).head] = (c);                               \
+		INC((queue).head);                                             \
+	})
 
 #define INTR_CHAR(tty) ((tty)->termios.c_cc[VINTR])
 #define QUIT_CHAR(tty) ((tty)->termios.c_cc[VQUIT])
@@ -42,7 +48,7 @@ struct tty_struct {
 	struct termios termios; //终端io属性和控制字符
 	int pgrp; //所属进程组
 	int stopped; //停止标志
-	void (*write)(struct tty_struct * tty);
+	void (*write)(struct tty_struct *tty);
 	struct tty_queue read_q;
 	struct tty_queue write_q;
 	struct tty_queue secondary; //辅助队列
@@ -62,13 +68,12 @@ void rs_init(void);
 void con_init(void);
 void tty_init(void);
 
-int tty_read(unsigned c, char * buf, int n);
-int tty_write(unsigned c, char * buf, int n);
+int tty_read(unsigned c, char *buf, int n);
+int tty_write(unsigned c, char *buf, int n);
 
-void rs_write(struct tty_struct * tty);
-void con_write(struct tty_struct * tty);
+void rs_write(struct tty_struct *tty);
+void con_write(struct tty_struct *tty);
 
-void copy_to_cooked(struct tty_struct * tty);
-
+void copy_to_cooked(struct tty_struct *tty);
 
 #endif

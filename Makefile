@@ -146,7 +146,7 @@ bochs-clean:
 
 clean:
 	@rm -f Image system.elf system.tmp system.map system.list system.syms tmp_make appending.bin system.bin
-	@rm -f init/*.o tools/build tools/bochsout.txt tools/system
+	@rm -f init/*.o tools/build tools/bochsout.txt tools/system tools/a.img
 	@for i in mm fs kernel lib boot;do make clean -C $$i; done
 
 ### Dependencies:

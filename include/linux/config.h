@@ -43,8 +43,4 @@
  leave HD_TYPE undefined. This is the normal thing to do.
 */
 
-
-
-
-
 #endif

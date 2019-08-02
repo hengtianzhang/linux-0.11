@@ -2,8 +2,8 @@
  * 文件访问和修改时间结构
  */
 
- #ifndef _UTIME_H
- #define _UTIME_H
+#ifndef _UTIME_H
+#define _UTIME_H
 
 #include <sys/types.h>
 
@@ -14,4 +14,4 @@ struct utimbuf {
 
 extern int utime(const char *filename, struct utimbuf *times);
 
- #endif
+#endif

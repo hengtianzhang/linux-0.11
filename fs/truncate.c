@@ -9,8 +9,8 @@
 /* dev 文件系统所在设备的设备号，block是逻辑块号 */
 static void free_ind(int dev, int block)
 {
-	struct buffer_head * bh;
-	unsigned short * p;
+	struct buffer_head *bh;
+	unsigned short *p;
 	int i;
 
 	/* 有效性判断 */
@@ -18,7 +18,7 @@ static void free_ind(int dev, int block)
 		return;
 	/*读取一次间接块，并释放其上表明使用的所有逻辑块*/
 	if ((bh = bread(dev, block))) {
-		p = (unsigned short *) bh->b_data; //指向缓冲块数据区
+		p = (unsigned short *)bh->b_data; //指向缓冲块数据区
 		for (i = 0; i < 512; i++, p++)
 			if (*p)
 				free_block(dev, *p);
@@ -28,20 +28,19 @@ static void free_ind(int dev, int block)
 	free_block(dev, block);
 }
 
-
 /* 释放所有二次间接块 */
 static void free_dind(int dev, int block)
 {
-	struct buffer_head * bh;
-	unsigned short * p;
+	struct buffer_head *bh;
+	unsigned short *p;
 	int i;
 
 	if (!block)
-		return ;
+		return;
 
 	/* 读取二次间接块的一级块，并释放其上表明使用的所有逻辑块，然后释放一级块 */
 	if ((bh = bread(dev, block))) {
-		p = (unsigned short *) bh->b_data;
+		p = (unsigned short *)bh->b_data;
 		for (i = 0; i < 512; i++, p++)
 			if (*p)
 				free_ind(dev, *p);
@@ -50,16 +49,15 @@ static void free_dind(int dev, int block)
 	free_block(dev, block);
 }
 
-
 /* 截断文件数据函数 */
 /* 将节点对应文件长度截为0，并释放占用的设备空间 */
-void truncate(struct m_inode * inode)
+void truncate(struct m_inode *inode)
 {
 	int i;
 
 	/* 如果不是常规文件或是目录文件则返回 */
 	if (!(S_ISREG(inode->i_mode) || S_ISDIR(inode->i_mode)))
-		return ;
+		return;
 	/* 释放i节点的7个直接逻辑块 */
 	for (i = 0; i < 7; i++)
 		if (inode->i_zone[i]) {
@@ -75,23 +73,3 @@ void truncate(struct m_inode * inode)
 	/* 重置修改文件时间和i节点改变时间为当前时间 */
 	inode->i_mtime = inode->i_ctime = CURRENT_TIME;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
