@@ -96,7 +96,7 @@ static void make_request(int major, int rw, struct buffer_head * bh)
 {
 	struct request * req;
 	int rw_ahead;
-	if (rw_ahead = (rw == READA || rw == WRITEA)) {
+	if ((rw_ahead = (rw == READA || rw == WRITEA))) {
 		if (bh->b_lock)
 			return ;
 		if (rw == READA)

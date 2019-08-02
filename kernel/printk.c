@@ -38,7 +38,7 @@ __asm__ __volatile__(
 
 static char buf[1024]; //顯示用臨時緩衝區
 
-extern int vsprintf(char *buf, const * fmt, va_list args);
+extern int vsprintf(char *buf, const char * fmt, va_list args);
 
 int printk(const char *fmt, ...)
 {

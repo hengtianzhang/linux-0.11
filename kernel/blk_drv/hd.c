@@ -251,7 +251,7 @@ static int drive_busy(void)
 			break;
 	i = inb(HD_STATUS);
 	i &= BUSY_STAT | READY_STAT | SEEK_STAT;
-	if (i == READY_STAT | SEEK_STAT) //仅有此两种状态则返回
+	if (i == (READY_STAT | SEEK_STAT)) //仅有此两种状态则返回
 		return 0;
 	printk("HD controller times out\n\r"); //等待超时
 	return 1;

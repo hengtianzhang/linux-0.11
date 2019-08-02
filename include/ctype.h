@@ -33,8 +33,8 @@ extern char _ctmp;               //一个临时字符变量
 #define isascii(c) (((unsigned) c)<=0x7f)              //是ASCII字符
 #define toascii(c) (((unsigned) c)&0x7f)               //转换成ASCII字符
 
-#define tolower(c) (_ctmp=c,isupper(_ctmp)?_ctmp-('A'-'a'):_ctmp)  //转换成小写字符
-#define toupper(c) (_ctmp=c,islower(_ctmp)?_ctmp-('a'-'A'):_ctmp)  //转换成大写字符
+#define tolower(c) (_ctmp=c,(char)isupper((unsigned char)_ctmp)?_ctmp-('A'-'a'):_ctmp)  //转换成小写字符
+#define toupper(c) (_ctmp=c,(char)islower((unsigned char)_ctmp)?_ctmp-('a'-'A'):_ctmp)  //转换成大写字符
 
 #endif
 

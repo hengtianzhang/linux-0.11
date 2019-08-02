@@ -4,10 +4,10 @@
 #include <linux/head.h>
 #include <linux/kernel.h>
 
-volatile void do_exit(long code);
+void do_exit(long code);
 
 /*print mem full error*/
-static inline volatile void oom(void)
+static inline void oom(void)
 {
 	printk("out of memory\n\r");
 	do_exit(SIGSEGV); //资源暂时不可用
@@ -244,7 +244,7 @@ void write_verify(unsigned long address)
 	page += ((address>>10) & 0xffc);
 	if ((3 & *(unsigned long *) page) == 1)//检测位1(R/W)位0(P)
 		un_wp_page((unsigned long *) page);
-		return;
+	return;
 }
 
 
@@ -287,11 +287,12 @@ static int try_to_share(unsigned long address, struct task_struct * p)
 	if (phys_addr >= HIGH_MEMORY || phys_addr < LOW_MEM)
 		return 0;
 	to = *(unsigned long *) to_page; //当前进程页表项内容
-	if (!(to & 1)) //P=0
-		if (to = get_free_page())
+	if (!(to & 1)) { //P=0
+		if ((to = get_free_page()))
 			*(unsigned long *) to_page = to | 7;
 		else
 			oom();
+	}
 	to &= 0xfffff000;
 	to_page = to + ((address>>10) & 0xffc);
 	if (1 & *(unsigned long *) to_page)

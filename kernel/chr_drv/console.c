@@ -539,7 +539,7 @@ void con_write(struct tty_struct * tty)
 					par[npar]=0;
 				npar=0;
 				state=3;
-				if (ques=(c=='?'))
+				if ((ques=(c=='?')))
 					break;
 			case 3:
 				if (c==';' && npar<NPAR-1) {

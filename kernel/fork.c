@@ -113,7 +113,7 @@ int copy_process(int nr,long ebp,long edi,long esi,long gs,long none,
 	}
 	//如果父进程有文件打开，则将对应文件打开次数加1
 	for (i = 0; i < NR_OPEN; i++)
-		if (f = p->filp[i])
+		if ((f = p->filp[i]))
 			f->f_count++;
 	if (current->pwd)
 		current->pwd->i_count++;

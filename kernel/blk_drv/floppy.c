@@ -95,7 +95,7 @@ struct task_struct * wait_on_floppy_select = NULL;
 //取消选定软驱
 void floppy_deselect(unsigned int nr)
 {
-	if (nr != current_DOR & 3)
+	if (nr != (current_DOR & 3))
 		printk("floppy_deselect: drive not selectd\n\r");
 	selected = 0; //复位软驱已选定标志
 	wake_up(&wait_on_floppy_select);

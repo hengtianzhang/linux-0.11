@@ -8,8 +8,8 @@
 #include <unistd.h>
 #include <time.h>
 
-static inline fork(void) __attribute__((always_inline));
-static inline pause(void) __attribute__((always_inline));
+static inline int fork(void) __attribute__((always_inline));
+static inline int pause(void) __attribute__((always_inline));
 static inline _syscall0(int,fork)
 static inline _syscall0(int,pause)
 static inline _syscall1(int,setup,void *,BIOS)
@@ -174,10 +174,9 @@ void init(void)
     }
 
     if (pid > 0)
-        while (pid != wait(&i))
-            ;
+        while (pid != wait(&i));
     while (1) {
-        if (!(pid = fork()) < 0) {
+        if ((pid = fork()) < 0) {
             printf("Fork failed in init\n\r");
             continue;
         }

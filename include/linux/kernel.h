@@ -6,7 +6,7 @@
 void verify_area(void * addr, int count);
 
 /*显示内核出错信息，然后死循环*/
-volatile void panic(const char * str);
+void panic(const char * str);
 
 /*标准打印*/
 int printf(const char * fmt, ...);

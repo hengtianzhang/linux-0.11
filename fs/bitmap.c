@@ -78,7 +78,7 @@ int new_block(int dev)
 		panic("trying to get new block from nonexistent device");
 	j = 8192;
 	for (i = 0; i < 8; i++)
-		if (bh = sb->s_zmap[i])
+		if ((bh = sb->s_zmap[i]))
 			if ((j = find_first_zero(bh->b_data)) < 8192)
 				break;
 	if (i >= 8 || !bh || j >= 8192)
@@ -157,7 +157,7 @@ struct m_inode * new_inode(int dev)
 		panic("new_inode with unknown inode");
 	j = 8192;
 	for (i = 0; i < 8; i++)
-		if (bh = sb->s_imap[i])
+		if ((bh = sb->s_imap[i]))
 			if ((j = find_first_zero(bh->b_data)) < 8192)
 				break;
 	if (!bh || j >= 8192 || j + i*8192 > sb->s_ninodes) {

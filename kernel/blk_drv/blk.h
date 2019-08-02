@@ -31,9 +31,9 @@ struct request {
  *用于判断两个请求前后排序顺序
  */
 #define IN_ORDER(s1,s2) \
-((s1)->cmd<(s2)->cmd || (s1)->cmd==(s2)->cmd && \
+((s1)->cmd<(s2)->cmd || ((s1)->cmd==(s2)->cmd && \
 ((s1)->dev < (s2)->dev || ((s1)->dev == (s2)->dev && \
-(s1)->sector < (s2)->sector)))
+(s1)->sector < (s2)->sector))))
 
 //块设备结构
 struct blk_dev_struct {

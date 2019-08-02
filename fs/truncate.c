@@ -17,7 +17,7 @@ static void free_ind(int dev, int block)
 	if (!block)
 		return;
 	/*读取一次间接块，并释放其上表明使用的所有逻辑块*/
-	if (bh = bread(dev, block)) {
+	if ((bh = bread(dev, block))) {
 		p = (unsigned short *) bh->b_data; //指向缓冲块数据区
 		for (i = 0; i < 512; i++, p++)
 			if (*p)
@@ -40,7 +40,7 @@ static void free_dind(int dev, int block)
 		return ;
 
 	/* 读取二次间接块的一级块，并释放其上表明使用的所有逻辑块，然后释放一级块 */
-	if (bh = bread(dev, block)) {
+	if ((bh = bread(dev, block))) {
 		p = (unsigned short *) bh->b_data;
 		for (i = 0; i < 512; i++, p++)
 			if (*p)

@@ -11,10 +11,13 @@
 
 //鏈接生成 end
 extern int end;
+extern void put_super(int);
+extern void invalidate_inodes(int);
 struct buffer_head * start_buffer = (struct buffer_head * )&end;
 struct buffer_head * hash_table[NR_HASH];
 static struct buffer_head * free_list; //空閑緩衝塊鏈表頭指針
 static struct task_struct * buffer_wait = NULL; //等待空閑緩衝塊而睡眠的任務隊列
+
 
 int NR_BUFFERS = 0; //系統含有的緩衝塊個數
 
@@ -186,7 +189,7 @@ struct buffer_head * getblk(int dev, int block)
 {
 	struct buffer_head * tmp, * bh;
 repeat:
-	if (bh = get_hash_table(dev,block))
+	if ((bh = get_hash_table(dev,block)))
 		return bh;
 	tmp = free_list;
 	do {
@@ -273,7 +276,7 @@ void bread_page(unsigned long address,int dev,int b[4])
 	int i;
 	for (i = 0; i < 4; i++)
 		if (b[i]) {
-			if (bh[i] = getblk(dev,b[i]))
+			if ((bh[i] = getblk(dev,b[i])))
 				if (!bh[i]->b_uptodate)
 					ll_rw_block(READ,bh[i]);
 		} else
