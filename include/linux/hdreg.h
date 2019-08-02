@@ -76,7 +76,7 @@ struct partition {
 	unsigned char end_head;
 	unsigned char end_sector;
 	unsigned char end_cyl;
-	unsigned int start_sects;
+	unsigned int start_sect;
 	unsigned int nr_sects;
 };
 

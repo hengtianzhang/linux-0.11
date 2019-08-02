@@ -14,7 +14,7 @@ MAKE = make
 #export CC CPP LD AR AS CFLAGS CDIR CHECKFLAGS
 
 RAMDISK = #-DRAMDISK=512
-
+HDA_IMG = ./tools/hdc-0.11-new.img
 include Makefile.header
 
 LDFLAGS += -M -Ttext 0x0 -e _start
@@ -113,6 +113,13 @@ dep:
 
 distclean: clean
 	@make clean -C tools/bochs/$(BOCHS)
+
+start:
+	@qemu-system-x86_64 -m 16M -boot a -fda Image -hda $(HDA_IMG)
+
+debug:
+	@echo $(OS)
+	@qemu-system-x86_64 -m 16M -boot a -fda Image -hda $(HDA_IMG) -s -S
 
 bochs-gdb:
 	@(cd tools;bochs -f bochsrc-gdb)

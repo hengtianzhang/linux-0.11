@@ -37,10 +37,10 @@ inb_p(0x71); \
 static void recal_intr(void);
 
 //重新校正标志。set 会调用recal_intr以将磁头移动到0柱面
-static int recalibrate = 1;
+static int recalibrate = 0;
 
 //复位标志 读写错误会设置该标志
-static int reset = 1;
+static int reset = 0;
 
 /*定义硬盘参数及类型*/
 //各字段分别是 磁头数 每磁道扇区数 柱面数 写前预补偿柱面数
@@ -170,7 +170,7 @@ int sys_setup(void * BIOS)
 		}
 		p = 0x1BE + (void *)bh->b_data; //分區表位置 一扇區0x1BE
 		for (i = 1; i < 5; i++, p++) {
-			hd[i+5*drive].start_sect = p->start_sects;
+			hd[i+5*drive].start_sect = p->start_sect;
 			hd[i+5*drive].nr_sects = p->nr_sects;
 		}
 		brelse(bh); //釋放為存放硬盤數據塊而申請的緩衝區
@@ -190,8 +190,8 @@ int sys_setup(void * BIOS)
 //間超時 
 static int controller_ready(void)
 {
-	int retries = 10000;
-	while (--retries && (inb_p(HD_STATUS)&0xc0) != 0x40);
+	int retries = 100000;
+	while (--retries && (inb_p(HD_STATUS)&0x80));
 	return (retries);
 }
 
