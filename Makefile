@@ -2,19 +2,25 @@ VERSION = 1
 
 ROOT_DIR = $(shell pwd)
 
-BOCHS = bochs-2.6.9
-
 MAKE = make
 
-#CFLAGS =-m32 -std=gnu89 -march=i386 -O1 -Wall -Wstrict-prototypes -fno-strict-aliasing -fomit-frame-pointer -fno-pic -fno-stack-protector -pipe -fno-reorder-functions
-#CDIR = -nostdinc -I$(ROOT_DIR)/include
-#CHECKFLAGS = -D__KERNEL__
-#LDFLAGS =-m elf_i386 -M -Ttext 0x0
-
-#export CC CPP LD AR AS CFLAGS CDIR CHECKFLAGS
-
-RAMDISK = #-DRAMDISK=512
+# indicate the Hardware Image file
 HDA_IMG = ./tools/hdc-0.11-new.img
+
+#
+# if you want the ram-disk device, define this to be the
+# size in blocks.
+#
+RAMDISK =  #-DRAMDISK=512
+
+# indicate the path of the calltree
+CALLTREE=$(shell find tools/ -name "calltree" -perm 755 -type f)
+
+# indicate the path of the bochs
+#BOCHS=$(shell find tools/ -name "bochs" -perm 755 -type f)
+BOCHS=bochs
+
+# This is a basic Makefile for setting the general configuration
 include Makefile.header
 
 LDFLAGS += -M -Ttext 0x0 -e _start
@@ -22,9 +28,11 @@ CFLAGS  += $(RAMDISK) -Iinclude
 CPP += -Iinclude
 
 #
-# This is not used "ROOT_DEV"
+# ROOT_DEV specifies the default root-device when making the image.
+# This can be either FLOPPY, /dev/xxxx or empty, in which case the
+# default of /dev/hd6 is used by 'build'.
 #
-ROOT_DEV = #FLOPPY
+ROOT_DEV= #FLOPPY 
 
 ARCHIVES = kernel/kernel.o mm/mm.o fs/fs.o
 DRIVERS  = kernel/blk_drv/blk_drv.a kernel/chr_drv/chr_drv.a
@@ -40,8 +48,6 @@ LIBS     = lib/lib.a
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 
-#all:system.list system.syms Image
-#	@echo "\nmake all done!\n"
 all: Image
 
 Image: boot/bootsect.bin boot/setup.bin system.bin
@@ -121,26 +127,68 @@ debug:
 	@echo $(OS)
 	@qemu-system-x86_64 -m 16M -boot a -fda Image -hda $(HDA_IMG) -s -S
 
-bochs-gdb:
-	@(cd tools;bochs -f bochsrc-gdb)
+bochs-start:
+	@$(BOCHS) -q -f tools/bochs/bochsrc/bochsrc-hd.bxrc	
 
-bochs-run:
-	@(cd tools;bochs -f bochsrc)
+bochs-debug:
+	@$(BOCHS) -q -f tools/bochs/bochsrc/bochsrc-hd-dbg.bxrc	
 
-bochs-build-debug:
-	@(cd tools/bochs/$(BOCHS); \
-	./configure --enable-plugins --enable-disasm --enable-debugger; \
-	sudo make; \
-	sudo make install)
-
-bochs-build-gdb:
-	@(cd tools/bochs/$(BOCHS); \
-	./configure --enable-plugins --enable-disasm --enable-gdb-stub; \
-	sudo make; \
-	sudo make install)
+bochs:
+ifeq ($(BOCHS),)
+	@(cd tools/bochs/bochs-2.3.7; \
+	./configure --enable-plugins --enable-disasm --enable-gdb-stub;\
+	make)
+endif
 
 bochs-clean:
-	@make clean -C tools/bochs/$(BOCHS)
+	@make clean -C tools/bochs/bochs-2.3.7
+
+calltree:
+ifeq ($(CALLTREE),)
+	@make -C tools/calltree-2.3
+endif
+
+calltree-clean:
+	@(find tools/calltree-2.3 -name "*.o" \
+	-o -name "calltree" -type f | xargs -i rm -f {})
+
+cg: callgraph
+callgraph:
+	@calltree -b -np -m init/main.c | tools/tree2dotx > linux-0.11.dot
+	@dot -Tjpg linux-0.11.dot -o linux-0.11.jpg
+
+help:
+	@echo "<<<<This is the basic help info of linux-0.11>>>"
+	@echo ""
+	@echo "Usage:"
+	@echo "     make --generate a kernel floppy Image with a fs on hda1"
+	@echo "     make start -- start the kernel in qemu"
+	@echo "     make debug -- debug the kernel in qemu & gdb at port 1234"
+	@echo "     make disk  -- generate a kernel Image & copy it to tools/a.img(floppy)"
+	@echo "     make cscope -- genereate the cscope index databases"
+	@echo "     make tags -- generate the tag file"
+	@echo "     make cg -- generate callgraph of the system architecture"
+	@echo "     make clean -- clean the object files"
+	@echo "     make distclean -- only keep the source code files"
+	@echo ""
+	@echo "Note!:"
+	@echo "     * You need to install the following basic tools:"
+	@echo "          ubuntu|debian, qemu|bochs, ctags, cscope, calltree, graphviz "
+	@echo "          vim-full, build-essential, hex, dd, gcc 4.3.2 or later"
+	@echo "     * Becarefull to change the compiling options, which will heavily"
+	@echo "     influence the compiling procedure and running result."
+	@echo ""
+	@echo "Author:"
+	@echo "     * 1991, linus write and release the original linux 0.95(linux 0.11)."
+	@echo "     * 2005, jiong.zhao<gohigh@sh163.net> release a new version "
+	@echo "     which can be used in RedHat 9 along with the book 'Explaining "
+	@echo "     Linux-0.11 Completly', and he build a site http://www.oldlinux.org"
+	@echo "     * 2018, miracle<378479645@qq.com> release a new version which can be"
+	@echo "     used in ubuntu|debian 32bit|64bit with gcc 4.3.2 or later, and give some new "
+	@echo "     features for experimenting. such as this help info, boot/bootsect.s and"
+	@echo "     boot/setup.s with AT&T rewritting, porting to gcc 4.3.2 or later:-)"
+	@echo ""
+	@echo "<<<Be Happy To Play With It :-)>>>"
 
 .PHONY: clean
 
