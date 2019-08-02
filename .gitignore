@@ -52,4 +52,16 @@ dkms.conf
 
 #user define
 *.txt
+*.bin
+*.list
+*.syms
+*.tmp
+a.img
+hdc-0.11-new.img
+Image
+system
+bootsect
+setup
+kernel/chr_drv/keyboard.s
+build
 
