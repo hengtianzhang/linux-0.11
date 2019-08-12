@@ -7,14 +7,14 @@ Decompress the img file
 
 
 
-========= Original README =======
+# Original README
 
 linux-0.11 development environment(linux-based)
 	
 	miracle <378479645@qq.com>
 	update: 2019-8-2
 
-1. preparation
+# 1. preparation
 
 * a linux distribution: debian and ubuntu are recommended
 * a virtual machine: qemu(recommend) or bochs 
@@ -25,7 +25,7 @@ linux-0.11 development environment(linux-based)
 and you'd better install tools/calltree, tools/tree2dotx yourself: just copy
 them to /usr/bin, of course, you'd compile calltree at first.
 
-2. hack linux-0.11
+# 2. hack linux-0.11
 
 get help from the main Makefile of linux-0.11 and star to hack it.
 
@@ -49,7 +49,7 @@ $ sudo cp ./calltree/OBJ/i686-linux-cc/calltree /usr/bin
 use
 $ calltree 		// just type calltree and get the help
 
-3. debug
+# 3. debug
 
 start the kernel with qemu, which will listening on port 1234
 
@@ -64,7 +64,7 @@ $ gdb linux-0.11/tools/system
 (gdb) s			// si:assembly instruction, s|n: c statement(s will enter into subfunc)
 (gdb) ...
 
-4. Known issues
+# 4. Known issues
 	1. The shell command line will give you some Not owner
 		eg:
 			cp hello.c test.c
