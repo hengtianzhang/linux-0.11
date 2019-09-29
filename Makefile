@@ -410,12 +410,13 @@ USERINCLUDE    := \
 # Use LINUXINCLUDE when you must reference the include/ directory.
 # Needed to be compatible with the O= option
 LINUXINCLUDE    := \
-		-I$(srctree)/arch/$(SRCARCH)/include \
+		-I$(srctree)/include \
+		#-I$(srctree)/arch/$(SRCARCH)/include \
 		-I$(objtree)/arch/$(SRCARCH)/include/generated \
 		$(if $(KBUILD_SRC), -I$(srctree)/include) \
 		-I$(objtree)/include \
-		$(USERINCLUDE)
-
+		$(USERINCLUDE) 
+		
 KBUILD_AFLAGS   := -D__ASSEMBLY__ -fno-PIE
 KBUILD_CFLAGS   := -Wall -Wundef -Werror=strict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common -fshort-wchar -fno-PIE \
@@ -866,13 +867,14 @@ $(project)-deps := $(KBUILD_LDS) $(KBUILD_$(PROJECT)_INIT) $(KBUILD_$(PROJECT)_M
 objs-head := $(head-y)
 objs-main := main.a
 
-cmd_ar-main = $(AR) rcSTPD $@ $(KBUILD_$(PROJECT)_MAIN)
+cmd_ar-main = $(AR) rcSTPD $@ $(init-y) $(KBUILD_$(PROJECT)_MAIN)
 $(objs-main): $(init-y) $(KBUILD_$(PROJECT)_MAIN) FORCE
 	$(call if_changed,ar-main)
 
 quiet_cmd_link-$(project) = LD      $@
 cmd_link-$(project) = $(LD) -o $@                          \
-	-m elf_i386 -M -Ttext 0x0 -e _start $(objs-head) -L $(objs-main)
+	-m elf_i386 -M -Ttext 0x0 -e _start $(objs-head)  -L kernel/printk.o -L fs/built-in.a -L mm/built-in.a \
+	-L kernel/blk_drv/built-in.a -L kernel/chr_drv/built-in.a  -L lib/built-in.a> System.map
 
 $(project): $($(project)-deps) $(objs-main) FORCE
 	+$(call if_changed,link-$(project))
