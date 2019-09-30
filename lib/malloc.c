@@ -30,7 +30,7 @@ struct _bucket_dir bucket_dir[] = {
 
 struct bucket_desc *free_bucket_desc = (struct bucket_desc *)0;
 
-static inline void init_bucket_desc(void)
+static inline void init_bucket_desc()
 {
 	struct bucket_desc *bdesc, *first;
 	int i;

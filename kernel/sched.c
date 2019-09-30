@@ -75,7 +75,7 @@ struct {
 /*將當前協處理器内容保存至老協處理器狀態數組中。并將當前任務的協處理器
 	内容加載到協處理器
  */
-void math_state_restore(void)
+void math_state_restore()
 {
 	if (last_task_used_math == current)
 		return;
@@ -259,7 +259,7 @@ void do_floppy_timer(void)
 #define TIME_REQUEST 64
 static struct timer_list {
 	long jiffies;
-	void (*fn)(void);
+	void (*fn)();
 	struct timer_list *next;
 } timer_list[TIME_REQUEST], *next_timer = NULL;
 
@@ -329,9 +329,8 @@ void do_timer(long cpl)
 }
 
 //系统调用功能，设置报警定时时间值(秒)
-int sys_alarm(void)
+int sys_alarm(long seconds)
 {
-    long seconds = 3;
 	int old = current->alarm;
 	if (old)
 		old = (old - jiffies) / HZ;
@@ -376,9 +375,8 @@ int sys_getegid(void)
 }
 
 //系统调用 降低对CPU的使用优先权
-int sys_nice(void)
+int sys_nice(long increment)
 {
-    long increment = 3;
 	if (current->priority - increment > 0 && increment > 0)
 		current->priority -= increment;
 	return 0;

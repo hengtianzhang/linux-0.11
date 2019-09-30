@@ -31,8 +31,7 @@ static inline _syscall0(int, fork) static inline _syscall0(
 
 	static char printbuf[1024]; /*静态字符串数组,用作内核显示信息的缓存*/
 
-extern int vsprintf(char *buf, const char *fmt, va_list args);
-//extern int vsprintf(void); //送格式化输出到一字符串中
+extern int vsprintf(); //送格式化输出到一字符串中
 extern void init(void); //函数原型，初始化
 extern void blk_dev_init(void); //块设备初始化子程序
 extern void chr_dev_init(void); //字符设备初始化子程序

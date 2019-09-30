@@ -7,7 +7,7 @@
 
 void do_exit(int error_code) __attribute__((noreturn));
 
-int sys_sgetmask(void)
+int sys_sgetmask()
 {
 	return current->blocked;
 }

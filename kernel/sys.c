@@ -13,37 +13,37 @@
 #include <sys/times.h>
 #include <sys/utsname.h>
 
-int sys_ftime(void)
+int sys_ftime()
 {
 	return -ENOSYS;
 }
 
-int sys_break(void)
+int sys_break()
 {
 	return -ENOSYS;
 }
 
-int sys_ptrace(void)
+int sys_ptrace()
 {
 	return -ENOSYS;
 }
 
-int sys_stty(void)
+int sys_stty()
 {
 	return -ENOSYS;
 }
 
-int sys_gtty(void)
+int sys_gtty()
 {
 	return -ENOSYS;
 }
 
-int sys_rename(void)
+int sys_rename()
 {
 	return -ENOSYS;
 }
 
-int sys_prof(void)
+int sys_prof()
 {
 	return -ENOSYS;
 }
@@ -71,27 +71,27 @@ int sys_setgid(int gid)
 	return (sys_setregid(gid, gid));
 }
 
-int sys_acct(void)
+int sys_acct()
 {
 	return -ENOSYS;
 }
 
-int sys_phys(void)
+int sys_phys()
 {
 	return -ENOSYS;
 }
 
-int sys_lock(void)
+int sys_lock()
 {
 	return -ENOSYS;
 }
 
-int sys_mpx(void)
+int sys_mpx()
 {
 	return -ENOSYS;
 }
 
-int sys_ulimit(void)
+int sys_ulimit()
 {
 	return -ENOSYS;
 }
