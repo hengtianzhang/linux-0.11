@@ -49,7 +49,7 @@ extern void panic(const char *str);
 /*往tty上写指定长度的字符串*/
 extern int tty_write(unsigned minor, char *buf, int count);
 
-typedef int (*fn_ptr)();
+typedef int (*fn_ptr)(void);
 
 /*数学协处理器使用的结构，主要用于保存进程切换时i387的执行状态*/
 struct i387_struct {

@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# General architecture dependent options
+#
+
+#
+# Note: arch/$(SRCARCH)/Kconfig needs to be included first so that it can
+# override the default values in this file.
+#
+source "arch/$(SRCARCH)/Kconfig"
+
+menu "General architecture-dependent options"
+
+config CC_HAS_STACKPROTECTOR_NONE
+	def_bool $(cc-option,-fno-stack-protector)
+
+config STACKPROTECTOR
+	bool "Stack Protector buffer overflow detection"
+	depends on HAVE_STACKPROTECTOR
+	depends on $(cc-option,-fstack-protector)
+	default y
+	help
+	  This option turns on the "stack-protector" GCC feature. This
+	  feature puts, at the beginning of functions, a canary value on
+	  the stack just before the return address, and validates
+	  the value just before actually returning.  Stack based buffer
+	  overflows (that need to overwrite this return address) now also
+	  overwrite the canary, which gets detected and the attack is then
+	  neutralized via a kernel panic.
+
+	  Functions will have the stack-protector canary logic added if they
+	  have an 8-byte or larger character array on the stack.
+
+	  This feature requires gcc version 4.2 or above, or a distribution
+	  gcc with the feature backported ("-fstack-protector").
+
+	  On an x86 "defconfig" build, this feature adds canary checks to
+	  about 3% of all kernel functions, which increases kernel code size
+	  by about 0.3%.
+
+source "scripts/gcc-plugins/Kconfig"
+
+endmenu

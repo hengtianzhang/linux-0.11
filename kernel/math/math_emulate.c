@@ -2,6 +2,6 @@ void math_error(void)
 {
 }
 
-void math_emulate()
+void math_emulate(void)
 {
 }
