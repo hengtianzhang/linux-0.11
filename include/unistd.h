@@ -220,7 +220,7 @@ int execlp(const char *file, char *arg0, ...);
 int execle(const char *pathname, char *arg0, ...);
 //volatile void exit(int status);
 //volatile void _exit(int status);
-void _exit(int status);
+void _exit(int exit_code);
 int fcntl(int fildes, int cmd, ...);
 //static int fork(void);
 int getpid(void);

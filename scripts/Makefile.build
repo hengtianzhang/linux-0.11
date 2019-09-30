@@ -60,7 +60,7 @@ real-obj-y += $(obj)/lib-ksyms.o
 endif
 
 ifneq ($(strip $(real-obj-y) $(need-builtin)),)
-builtin-target := $(obj)/built-in.a
+builtin-target := $(obj)/built-in.o
 endif
 
 modorder-target := $(obj)/modules.order
@@ -402,12 +402,12 @@ ifdef builtin-target
 # makes them small and fast, but unable to be used by the linker.
 # scripts/link-vmlinux.sh builds an aggregate built-in.a with a symbol
 # table and index.
-quiet_cmd_ar_builtin = AR      $@
-      cmd_ar_builtin = rm -f $@; \
-                     $(AR) rcSTP$(KBUILD_ARFLAGS) $@ $(filter $(real-obj-y), $^)
+quiet_cmd_ld_builtin = LD      $@
+      cmd_ld_builtin = $(if $(strip $(real-obj-y)),\
+    	rm -f $@; $(LD) $(ld_flags) -r -o $@ $(filter $(real-obj-y), $^))
 
 $(builtin-target): $(real-obj-y) FORCE
-	$(call if_changed,ar_builtin)
+	$(call if_changed,ld_builtin)
 
 targets += $(builtin-target)
 endif # builtin-target

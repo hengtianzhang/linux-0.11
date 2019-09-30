@@ -837,18 +837,17 @@ $(project)-alldirs	:= $(sort $($(project)-dirs) $(patsubst %/,%,$(filter %/, \
 		     $(init-) $(core-) $(drivers-) $(net-) $(libs-) $(virt-))))
 
 
-init-y		:= $(patsubst %/, %/built-in.a, $(init-y))
-core-y		:= $(patsubst %/, %/built-in.a, $(core-y))
-drivers-y	:= $(patsubst %/, %/built-in.a, $(drivers-y))
-net-y		:= $(patsubst %/, %/built-in.a, $(net-y))
-libs-y1		:= $(patsubst %/, %/lib.a, $(libs-y))
-libs-y2		:= $(patsubst %/, %/built-in.a, $(filter-out %.a, $(libs-y)))
-virt-y		:= $(patsubst %/, %/built-in.a, $(virt-y))
+init-y		:= $(patsubst %/, %/built-in.o, $(init-y))
+core-y		:= $(patsubst %/, %/built-in.o, $(core-y))
+drivers-y	:= $(patsubst %/, %/built-in.o, $(drivers-y))
+net-y		:= $(patsubst %/, %/built-in.o, $(net-y))
+libs-y		:= $(patsubst %/, %/lib.a, $(libs-y))
+virt-y		:= $(patsubst %/, %/built-in.o, $(virt-y))
 
 # Externally visible symbols (used by link-vmlinux.sh)
 export KBUILD_$(PROJECT)_INIT := $(head-y) $(init-y)
-export KBUILD_$(PROJECT)_MAIN := $(core-y) $(libs-y2) $(drivers-y) $(net-y) $(virt-y)
-export KBUILD_$(PROJECT)_LIBS := $(libs-y1)
+export KBUILD_$(PROJECT)_MAIN := $(core-y) $(drivers-y) $(net-y) $(virt-y)
+export KBUILD_$(PROJECT)_LIBS := $(libs-y)
 export KBUILD_LDS          := arch/$(SRCARCH)/kernel/vmlinux.lds
 export LDFLAGS_$(project)
 # used by scripts/package/Makefile
@@ -864,21 +863,12 @@ $(project)-deps := $(KBUILD_LDS) $(KBUILD_$(PROJECT)_INIT) $(KBUILD_$(PROJECT)_M
 #vmlinux: scripts/link-vmlinux.sh $(vmlinux-deps) FORCE
 #	+$(call if_changed,link-vmlinux)
 
-objs-head := $(head-y)
-objs-main := main.a
-
-cmd_ar-main = $(AR) rcSTPD $@ $(init-y) $(KBUILD_$(PROJECT)_MAIN)
-$(objs-main): $(init-y) $(KBUILD_$(PROJECT)_MAIN) FORCE
-	$(call if_changed,ar-main)
-
 quiet_cmd_link-$(project) = LD      $@
 cmd_link-$(project) = $(LD) -o $@                          \
-	-m elf_i386 -M -Ttext 0x0 -e _start $(objs-head)  -L kernel/printk.o -L fs/built-in.a -L mm/built-in.a \
-	-L kernel/blk_drv/built-in.a -L kernel/chr_drv/built-in.a  -L lib/built-in.a> System.map
+	$(KBUILD_LDFLAGS) $(LDFLAGS_$(project)) $(head-y) $(init-y) $(KBUILD_$(PROJECT)_MAIN) $(KBUILD_$(PROJECT)_LIBS)> System.map
 
-$(project): $($(project)-deps) $(objs-main) FORCE
+$(project): $($(project)-deps) FORCE
 	+$(call if_changed,link-$(project))
-	@rm -rf $(objs-main)
 
 targets := $(project)
 
