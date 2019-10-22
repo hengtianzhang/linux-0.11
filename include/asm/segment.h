@@ -40,14 +40,14 @@ static inline void put_fs_long(unsigned long val, unsigned long *addr)
 }
 
 /*取选择符*/
-static inline unsigned long get_fs()
+static inline unsigned long get_fs(void)
 {
 	unsigned short _v;
 	__asm__("mov %%fs,%%ax" : "=a"(_v) :);
 	return _v;
 }
 
-static inline unsigned long get_ds()
+static inline unsigned long get_ds(void)
 {
 	unsigned short _v;
 	__asm__("mov %%ds,%%ax" : "=a"(_v) :);
